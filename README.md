@@ -1,2 +1,2 @@
 # jGrid
-jGrid专注构建复杂的表格 Build a complex tables
+jGrid专注构建复杂表格 create a complex table
