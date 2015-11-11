@@ -1,0 +1,137 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>staticPageTest</title>
+    <script src="../../../jquery-1.9.1.js" type="text/javascript"></script>
+    <script src="../jch.staticPage-1.0.js" type="text/javascript"></script>
+    <style type="text/css">
+        .demo { padding: 50px; }
+        .demo_item { margin-bottom: 20px; }
+        .detail { width: 600px; height: 240px; overflow: hidden; position: relative; display: inline-block; }
+        .box { width: 440px; height: 240px; overflow: hidden; position: relative; display: inline-block; }
+        .imgview { width: 999999px; height: 240px; }
+        .imgview a img { width: 440px; height: 239px; }
+        .imgview a { position: absolute; left: 0px; }
+        .imgview a.current { left: 0px; z-index: 1; }
+        .left, .right { z-index: 10; width: 22px; height: 41px; top: 85px; overflow: hidden; position: absolute; display: block; cursor: pointer; }
+        .left { background: url("Image/button.png") 0 -42px repeat scroll; left: 0; _filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(enabled='true',sizingMethod='crop',src="Image/left.png"); _background: none; }
+        .left:hover { background-position: 0px 0px; _filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(enabled='true',sizingMethod='crop',src="Image/left_hover.png"); _background: none; }
+        .right { background: url("Image/button.png") -106px -42px repeat scroll; right: 0; _filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(enabled='true',sizingMethod='crop',src="Image/right.png"); _background: none; }
+        .right:hover { background-position: -106px 0px; _filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(enabled='true',sizingMethod='crop',src="Image/right_hover.png"); _background: none; }
+        .title { z-index: 10; width: 100%; height: 30px; left: 0; bottom: 0; background: rgba(0,0,0,0.6) 0 0 none repeat scroll; background: url("Image/title.png") 0 0 repeat scroll\9; position: absolute; _filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(enabled='true',sizingMethod='scale',src="Image/title.png"); _background: none; }
+        .title a { margin-left: 20px; color: #D0D0D0; display: block; height: 30px; letter-spacing: 1px; font: bold 14px/30px '宋体',宋体,Microsoft YaHei,sans-serif; overflow: hidden; text-decoration: none; text-overflow: ellipsis; white-space: nowrap; width: 307px; }
+        .navi { z-index: 10; bottom: 7px; height: 10px; overflow: hidden; position: absolute; right: 15px; width: 110px; }
+        .navi a { z-index: 11; background: url("Image/button.png") repeat scroll -13px -88px; float: left; height: 10px; line-height: 10; margin-right: 5px; overflow: hidden; width: 8px; _filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(enabled='true',sizingMethod='crop',src="Image/navi.png"); _background: none; }
+        .navi a:hover { background-position: 0 -88px; _filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(enabled='true',sizingMethod='crop',src="Image/navi_hover.png"); _background: none; }
+        .navi a.current { background-position: 0 -88px; _filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(enabled='true',sizingMethod='crop',src="Image/navi_hover.png"); _background: none; }
+    </style>
+    <script type="text/javascript">
+        $(function () {
+            //输出日志
+            function messLog(args) {
+                window["console"] && console.log(arguments);
+            }
+            //===========
+            var $box1 = $(".box1");
+            var spDemo1 = $.staticPage({
+                name: "demo1_" + new Date().getTime(),
+                jqPages: $box1.find(".imgview a"),
+                jqPrev: $box1.find(".left"),
+                jqNext: $box1.find(".right"),
+                jqNavi: $box1.find(".navi a"),
+                effect: { name: "fadeSync" }
+            });
+            //=============================
+            var $box2 = $(".box2");
+            var spDemo2 = $.staticPage({
+                name: "demo2_" + new Date().getTime(),
+                jqPages: $box2.find(".imgview a"),
+                jqPrev: $box2.find(".left"),
+                jqNext: $box2.find(".right"),
+                jqNavi: $box2.find(".navi a"),
+                isLoop: true,
+                isShowLog: true,
+                isAnimeQueue: false,
+                event: "click",
+                eventNavi: "mouseover",
+                effect: {
+                    name: "moveHor",
+                    onPageOut: function () { messLog("onPageOut ", this); },
+                    onPageIn: function () { messLog("onPageIn ", this); },
+                    onStart: function (curr, dst) {
+                        messLog("onStart ", this, curr, dst);
+                        $(".box2 .title a:eq(0)").text("第" + dst + "页");
+                        if (!!window.navigator.userAgent.match(/chrome/i)) {
+                            $box2.find(".imgview a").eq(curr).css("z-index", "9");
+                        }
+                    },
+                    onCompleted: function () { messLog("onCompleted ", this); }
+                },
+                onNextFocus: function () { messLog("onNextFocus ", this); },
+                onNextFocused: function () { messLog("onNextFocused ", this) }
+            });
+
+            $(".box2_add").click(function () {
+                var view = $box2.find(".imgview");
+                var last = parseInt(view.find("a").last().find("img").attr("src").match(/\d/)[0]);
+                last++;
+                view.append("<a><img src='Image/" + last + ".jpg'/></a>");
+                $(".box2 .navi").append("<a class='navi_item'></a>");
+                //更新staticPage
+                spDemo2.setting.jqPages = $box2.find(".imgview a");
+                spDemo2.setting.jqNavi = $box2.find(".navi a");
+                spDemo2.init();
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="demo">
+        <div class="demo_item">
+            <div class="box box1">
+                <div class="imgview">
+                    <a>
+                        <img src="Image/1.jpg" /></a> <a>
+                            <img src="Image/2.jpg" /></a> <a>
+                                <img src="Image/3.jpg" /></a> <a>
+                                    <img src="Image/4.jpg" /></a>
+                </div>
+                <a href="javascript:void(0);" class="left"></a><a href="javascript:void(0);" class="right"></a>
+                <div class="title">
+                    <a href="javascript:void(0);">文字说明1</a>
+                </div>
+                <div class="navi">
+                    <a class="navi_item"></a><a class="navi_item"></a><a class="navi_item"></a><a class="navi_item"></a>
+                </div>
+            </div>
+            <div class="detail">
+                最简单的引用
+            </div>
+        </div>
+        <div class="demo_item">
+            <div class="box box2">
+                <div class="imgview">
+                    <a>
+                        <img src="Image/1.jpg" /></a> <a>
+                            <img src="Image/2.jpg" /></a> <a>
+                                <img src="Image/3.jpg" /></a> <a>
+                                    <img src="Image/4.jpg" /></a>
+                </div>
+                <a href="javascript:void(0);" class="left"></a><a href="javascript:void(0);" class="right"></a>
+                <div class="title">
+                    <a href="javascript:void(0);">文字说明1</a>
+                </div>
+                <div class="navi">
+                    <a class="navi_item"></a><a class="navi_item"></a><a class="navi_item"></a><a class="navi_item"></a>
+                </div>
+            </div>
+            <div class="detail">
+                ajax动态加载<br />
+                <input class="box2_add" type="button" value="添加一张图片" /><br />
+                事件<br />
+                事件触发顺序：onNextFocus,onStart,onPageOut,onPageIn,onCompleted,onNextFocused 
+            </div>
+        </div>
+    </div>
+</body>
+</html>

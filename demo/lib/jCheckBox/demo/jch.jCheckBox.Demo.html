@@ -1,0 +1,299 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title></title>
+    <style>
+        [class^="box"] { line-height: 30px; }
+        .jCheckBox { vertical-align: sub; }
+    </style>
+    <script src="jquery-1.9.1.js"></script>
+    <link href="../jch.jCheckBox.css" rel="stylesheet" />
+    <script src="../jch.jCheckBox.js"></script>
+    <script type="text/javascript">
+        $(function () {
+
+            //=========cb1============
+            window.cb1 = window.jch.jCheckBox({
+                checked: true,
+                //enabled: false,
+                onCheckedChange: cb1onCheckedChange,
+                onBeforeCheckedChange: cb1onBeforeCheckedChange
+            });
+            $(".box1").prepend(cb1.element);
+
+            function cb1onCheckedChange(ischecked, e) {
+                console.log("选中后发生 onCheckedChange", this, ischecked);
+            }
+
+            function cb1onBeforeCheckedChange(ischecked, e) {
+                console.log("选中前发生 onBeforeCheckedChange", this, ischecked);
+            }
+
+
+            //========cb2=============
+            window.cb2 = window.jch.jCheckBox({
+                onBeforeCheckedChange: function (ischecked) {
+                    console.log("onBeforeCheckedChange", this, ischecked);
+                    if (ischecked === false) {
+                        console.log("返回false，阻止默认事件执行!");
+                        return false; //返回false，阻止默认事件执行
+                    } else {
+                        console.log("返回其他任意值，允许事件执行!");
+                        return;//返回其他任意值，允许事件执行
+                    }
+                }
+            });
+            $(".box2").prepend(cb2.element);
+
+            //========cb3=============
+            window.cb3 = window.jch.jCheckBox({
+                checked: true,
+                enabled: false,
+                onEnabledChange: cb3onEnabledChange,
+                onBeforeEnabledChange: cb3onBeforeEnabledChange
+            });
+            function cb3onEnabledChange(isenabled, e) {
+                console.log("启用禁用状态变更后发生 onEnabledChange", this, isenabled, e);
+            }
+
+            function cb3onBeforeEnabledChange(isenabled, e) {
+                console.log("启用禁用状态变更前发生 onBeforeEnabledChange", this, isenabled, e);
+            }
+            $(".box3").prepend(cb3.element);
+
+            //========cb4=============
+            window.cb4 = window.jch.jCheckBox({
+                onBeforeEnabledChange: function (isenabled) {
+                    if (isenabled === true) {
+                        console.log("不允许启用");
+                        return false;
+                    } else {
+                        console.log("允许禁用");
+                        //return;
+                    }
+                }
+            });
+            $(".box4").prepend(cb4.element);
+
+            //========cb5=============
+            window.cb5 = window.jch.jCheckBox({
+                element: $(".cb5")//直接在指定dom对象上生成复选框
+            });
+
+            //========cb6=============
+            window.cb6 = window.jch.jCheckBox({
+                element: $(".cb6"),
+                onCheckedChange: function (ischecked) {
+                    console.log((ischecked ? "全选" : "全不选") + "change");
+                }
+            });
+            var cb6arr = [];
+            var cb6Data = [];//模拟的假数据
+            for (var i = 0; i < 10; i++) { cb6Data.push({ myIndex: i }); }
+            $.each(cb6Data, function (i, o) {
+                var tcb = window.jch.jCheckBox({
+                    checked: function () {
+                        return i % 2 == 0;
+                    },
+                    enabled: function () {
+                        return i < 5;
+                    },
+                    onCheckedChange: function (ischecked) {
+                        console.log("第", i, "子复选框:", ischecked, ",数据：", this.element.data("mydata"));
+                    }
+                });
+                cb6arr.push(tcb);
+                tcb.element.data("mydata", o);
+                $(".cb6sub").append(tcb.element.css("margin", '0 3px'));
+            });
+            $(":button[class^='cb6_']").click(function (e) {
+                var enabled = getBoolByAttr($(this).attr("jenabled"));
+                var checked = getBoolByAttr($(this).attr("jchecked"));
+                var arr = $.map(cb6.getSubCheckBoxArr(enabled, checked), function (o, i) {
+                    return o.element;
+                });
+                console.log($(this).val(), arr);
+            });
+            //根据布尔值字符串返回布尔值
+            function getBoolByAttr(str) {
+                //var str = element.attr(attrName).toLowerCase();
+                var bool = (str == true.toString()) ? true : (str == false.toString()) ? false : null;
+                if (typeof (bool) == "boolean") {
+                    return bool;
+                } else {
+                    return undefined;
+                }
+            }
+
+            //设定全选，只有调用了此函数才可使用getSubCheckBoxArr方法
+            cb6.initCheckAllMode(cb6arr);
+            //=========cb7===========
+            window.cb7 = window.jch.jCheckBox({
+                element: $(".cb7")
+            });
+            var cb7arr = [];
+            var tcb = null;
+            var styleRadio = window.jch.jCheckBox.styleModeEnum.radioButton;
+            for (var i = 0; i < 5; i++) {
+                tcb = window.jch.jCheckBox({
+                    checked: function () { return i > 0; },
+                    enabled: function () { return i < 3; }
+                });
+                cb7arr.push(tcb);
+                $(".cb7sub").append(tcb.element.css("margin", '0 3px'));
+            }
+            cb7.initCheckAllMode(cb7arr);
+            cb7.setStyleMode(styleRadio);
+            $.each(cb7arr, function (i, a) { a.setStyleMode(styleRadio); });
+            //=========cb8===========
+            window.cb8 = window.jch.jCheckBox({});
+            var cb8arr = [];
+            var tcb = null;
+            for (var i = 0; i < 5; i++) {
+                tcb = window.jch.jCheckBox({});
+                cb8arr.push(tcb);
+                $(".cb8sub").append(tcb.element.css("margin", '0 3px'));
+            }
+            cb8.initRadioButtonGroupMode(cb8arr);
+            //=========cb9===========
+            window.cb9 = window.jch.jCheckBox({});
+            var cb9arr = [];
+            var tcb = null;
+            for (var i = 0; i < 5; i++) {
+                tcb = window.jch.jCheckBox({});
+                cb9arr.push(tcb);
+                $(".cb9sub").append(tcb.element.css("margin", '0 3px'));
+            }
+            cb9.initRadioButtonGroupMode(cb9arr);
+            $.each(cb9arr, function (i, a) { a.setStyleMode(window.jch.jCheckBox.styleModeEnum.checkBox); });
+            //=========cb10===========
+            //window.cb10 = window.jch.jCheckBox({ element: $(".cb10") });
+            setSubJcb($(".box10>.treePanel"));
+            function setSubJcb($bx) {
+                var jcb = window.jch.jCheckBox({ element: $bx.children("[class^='cb10']") });
+                var subJcb = [];
+                var $subTreePanel = $bx.children(".treePanel");
+                $.each($subTreePanel, function () {
+                    var $tp = $(this);
+                    var cb = window.jch.jCheckBox({ element: $tp.children("[class^='cb10']") });
+                    subJcb.push(cb);
+                    setSubJcb($tp);
+                });
+                jcb.initCheckAllMode(subJcb);
+            }
+        });
+    </script>
+</head>
+<body>
+    <h2>jCheckBox Demo</h2>
+    <div class="box1">
+        1、复选框change事件(请查看控制台)
+            <input type="button" class="" value="选中" onclick="cb1.change(true);" />
+        <input type="button" class="" value="不选" onclick="cb1.change(false);" />
+        <input type="button" class="" value="切换选中状态" onclick="cb1.change(!cb1.getIsChecked());" />
+    </div>
+    <div class="box2">
+        2、只允许选中不允许取消
+    </div>
+    <div class="box3">
+        3、启用/禁用 以及enabled事件(请查看控制台)
+            <input type="button" class="" value="禁用" onclick="cb3.enabled(false);" />
+        <input type="button" class="" value="启用" onclick="cb3.enabled(true);" />
+        <input type="button" class="" value="切换启用禁用状态" onclick="cb3.enabled(!cb3.getIsEnabled());" />
+    </div>
+    <div class="box4">
+        4、只允许禁用不允许启用
+            <input type="button" class="" value="禁用" onclick="cb4.enabled(false);" />
+        <input type="button" class="" value="启用" onclick="cb4.enabled(true);" />
+    </div>
+    <div class="box5">
+        <div class="cb5"></div>
+        5、直接生成dom对象
+    </div>
+    <div class="box6">
+        <div class="cb6"></div>
+        6、全选
+        <span class="cb6sub"></span>
+        <div style="margin-left: 40px;">
+            <input class="cb6_1" type="button" jenabled="true" value="可用的" />
+            <input class="cb6_2" type="button" jenabled="false" value="不可用的" />
+            <input class="cb6_3" type="button" jchecked="true" value="选中的" />
+            <input class="cb6_4" type="button" jchecked="false" value="没选的" />
+            <input class="cb6_5" type="button" jenabled="true" jchecked="true" value="可用选中的" />
+            <input class="cb6_6" type="button" jenabled="true" jchecked="false" value="可用没选的" />
+            <input class="cb6_7" type="button" jenabled="false" jchecked="true" value="不可用选中的" />
+            <input class="cb6_8" type="button" jenabled="false" jchecked="false" value="不可用没选的" />
+        </div>
+    </div>
+    <div class="box7">
+        <div class="cb7"></div>
+        7、全选（单选样式）
+        <span class="cb7sub"></span>
+    </div>
+    <div class="box8">
+        <div class="cb8"></div>
+        8、单选
+        <span class="cb8sub"></span>
+    </div>
+    <div class="box9">
+        <div class="cb9"></div>
+        9、单选（全选样式）
+        <span class="cb9sub"></span>
+    </div>
+    <div class="box10">
+        <style>
+            .treePanel { margin-left: 30px; border-left: 1px solid black; }
+        </style>
+        10、树状多级结构
+        <div class="treePanel" style="width: 300px; background: rgb(170,170,170);">
+            <div class="cb10"></div>
+            cb10
+            <div class="treePanel" style="background: rgb(199,199,199);">
+                <div class="cb10_1"></div>
+                cb10_1
+                <div class="treePanel" style="background: rgb(170,170,170);">
+                    <div class="cb10_1_1"></div>
+                    cb10_1_1
+                    <div class="treePanel" style="background: rgb(199,199,199);">
+                        <div class="cb10_1_1_1"></div>
+                        cb10_1_1_1
+                    </div>
+                    <div class="treePanel" style="background: rgb(199,199,199); margin-top: 10px;">
+                        <div class="cb10_1_1_2"></div>
+                        cb10_1_1_2
+                    </div>
+                </div>
+                <div class="treePanel" style="background: rgb(170,170,170); margin-top: 10px;">
+                    <div class="cb10_1_2"></div>
+                    cb10_1_2
+                </div>
+                <div class="treePanel" style="background: rgb(170,170,170); margin-top: 10px;">
+                    <div class="cb10_1_3"></div>
+                    cb10_1_3
+                    <div class="treePanel" style="background: rgb(199,199,199);">
+                        <div class="cb10_1_3_1"></div>
+                        cb10_1_3_1
+                    </div>
+                    <div class="treePanel" style="background: rgb(199,199,199);margin-top: 10px;">
+                        <div class="cb10_1_3_2"></div>
+                        cb10_1_3_2
+                    </div>
+                </div>
+            </div>
+            <div class="treePanel" style="background: rgb(199,199,199); margin-top: 10px;">
+                <div class="cb10_2"></div>
+                cb10_2
+                <div class="treePanel" style="background: rgb(170,170,170);">
+                    <div class="cb10_2_1"></div>
+                    cb10_2_1
+                </div>
+                <div class="treePanel" style="background: rgb(170,170,170);margin-top: 10px;">
+                    <div class="cb10_2_2"></div>
+                    cb10_2_2
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

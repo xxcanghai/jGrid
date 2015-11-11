@@ -1,0 +1,28 @@
+﻿/*.jCheckBox { width: 20px; height: 20px; display: inline-block; }
+.jCheckBox:hover {}
+.jCheckBox[jenabled='true']:hover { background-color: rgb(243,249,255); border-radius: 3px; }
+.jCheckBox[jchecked='true'][jenabled='true'] { background-image: url(images/checkbox_checked_enabled.png); }
+.jCheckBox[jchecked='true'][jenabled='false'] { background-image: url(images/checkbox_checked_disabled.png); }
+.jCheckBox[jchecked='false'][jenabled='true'] { background-image: url(images/checkbox_uncheck_enabled.png); }
+.jCheckBox[jchecked='false'][jenabled='false'] { background-image: url(images/checkbox_uncheck_disabled.png); }
+
+.jCheckBox[jenabled='true'][stylemode*='radioButton']:hover { background-color: rgb(243,249,255); border-radius: 27px; }
+.jCheckBox[jchecked='true'][jenabled='true'][stylemode*='radioButton'] { background-image: url(images/radio_checked_enabled.png); }
+.jCheckBox[jchecked='true'][jenabled='false'][stylemode*='radioButton'] { background-image: url(images/radio_checked_disabled.png); }
+.jCheckBox[jchecked='false'][jenabled='true'][stylemode*='radioButton'] { background-image: url(images/radio_uncheck_enabled.png); }
+.jCheckBox[jchecked='false'][jenabled='false'][stylemode*='radioButton'] { background-image: url(images/radio_uncheck_disabled.png); }*/
+
+.jCheckBox { width: 20px; height: 20px; display: inline-block; background-image: url(images/jCheckBoxBg.png); }
+.jCheckBox:hover { }
+.jCheckBox[jenabled='false'] { }
+.jCheckBox[jenabled='true']:hover { background-color: rgb(243,249,255); border-radius: 3px; }
+.jCheckBox[jchecked='true'][jenabled='true'] { background-position: -20px 0px; }
+.jCheckBox[jchecked='true'][jenabled='false'] { background-position: 0px 0px; }
+.jCheckBox[jchecked='false'][jenabled='true'] { background-position: -20px -40px; }
+.jCheckBox[jchecked='false'][jenabled='false'] { background-position: 0px -40px; }
+
+.jCheckBox[jenabled='true'][stylemode*='radioButton']:hover { background-color: rgb(243,249,255); border-radius: 27px; }
+.jCheckBox[jchecked='true'][jenabled='true'][stylemode*='radioButton'] { background-position: -20px -60px; }
+.jCheckBox[jchecked='true'][jenabled='false'][stylemode*='radioButton'] { background-position: 0px -60px; }
+.jCheckBox[jchecked='false'][jenabled='true'][stylemode*='radioButton'] { background-position: -20px -80px; }
+.jCheckBox[jchecked='false'][jenabled='false'][stylemode*='radioButton'] { background-position: 0px -80px; }
