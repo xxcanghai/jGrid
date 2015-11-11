@@ -1,0 +1,1619 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>jch.jGrid.Editor</title>
+
+    <script src="jquery-1.9.1.js"></script>
+    <script src="beautify.js"></script>
+    <!--<link href="../../../bootstrap3.0/css/bootstrap.css" rel="stylesheet" />-->
+    <link href="../../../main.css" rel="stylesheet" />
+    <script src="../../Core/jch.Core.js"></script>
+    <link href="../../jCheckBox/jch.jCheckBox.css" rel="stylesheet" />
+    <script src="../../jCheckBox/jch.jCheckBox.js"></script>
+    <script src="../../staticPage/jch.staticPage-1.0.js"></script>
+    <link href="../../tabControl/jch.tabControl.css" rel="stylesheet" />
+    <script src="../../tabControl/jch.tabControl.js"></script>
+    <link href="../../../wxc/xcConfirm/css/xcConfirm.css" rel="stylesheet" />
+    <script src="../../../wxc/xcConfirm/js/xcConfirm.js"></script>
+    <script src="../jch.jGrid.js"></script>
+    <link href="../jch.jGrid.css" rel="stylesheet" />
+    <script>
+        Array.prototype.repeat = function (count) {
+            if (count == undefined) return this;
+            var arr = this;
+            var dst = $.extend(true, [], arr);
+            for (var i = 0; i < count; i++) {
+                dst = dst.concat(arr);
+            }
+            return dst;
+        };
+        //bkLib.onDomLoaded(function () {
+        //    new nicEditor({ fullPanel: true }).panelInstance('txtServerData');
+        //});
+        window.onerror = function (e) {
+            console.error(e);
+            //alert(e);
+        };
+    </script>
+    <script type="text/javascript">
+        $(function () {
+            var jch = window.jch;
+            var core = jch.Core;
+            //window.jgrid = new window.jch.jGrid({});
+            $("form").get(0).reset(true);
+            window.jch.tabControl();
+
+
+            //进入页面显示 数据源 页面
+            tabGotoPage(0);
+
+            //设定页面最大高度
+            $(window).resize(function () {
+                $("#content,#right").css("height", parseInt($(window).height() - $("#header").outerHeight()));
+            }).resize();
+
+
+            $(".formConfig").bind("change", function (e) {
+                if ($(".runtimeEdit").is(":checked")) {
+                    $(".btnCreateConfig").click();
+                }
+            }).bind("keydown", function (e) {
+                if (e.keyCode == 13) {
+                    $(".btnCreateConfig").click();
+                }
+            });
+
+            //所有fieldset的复选框展开功能
+            $("fieldset").attr("height", function () { return $(this).height(); });
+            $("fieldset legend :checkbox").change(function () {
+                var $chk = $(this);
+                var $fid = $chk.closest("fieldset");
+                var $lk;
+                if ($chk.is(":checked")) {
+                    $fid.removeAttr("disabled").removeClass("disabled");
+                    $lk = $fid.find(".linkExpColl");
+                    if ($lk.text().indexOf("展开") >= 0) $lk.click();
+                } else {
+                    $fid.attr("disabled", "disabled").addClass("disabled");
+                    $lk = $fid.find(".linkExpColl");
+                    if ($lk.text().indexOf("收缩") >= 0) $lk.click();
+                }
+            });
+
+            //给所有fieldset增加一个 链接
+            var $linkExpColl = $("<a href='javascript:;' class='linkExpColl'>");
+            $linkExpColl.text(" 收缩▲").click(fieldExpColl);
+            $("fieldset legend").append($linkExpColl);
+
+            $("#isShowDefaultValue").change(function () { checkShowHide($(this), $("#defaultValue")); });
+
+            //表格header信息框事件委托
+            $(".formConfig").delegate(":checkbox[header='value']", "change", function () {
+                //列数据源修改
+                var $nextTd = $(this).closest("td").nextAll("td");
+                checkShowHide($(this), $nextTd.find("input"));
+                $nextTd.find(":radio:not([header='value'])").eq(0).prop("checked", true);
+                $nextTd.find(":text").val("");
+                if ($(this).is(":checked") == false) {
+                    $nextTd.find(".linkShowFn").addClass("disabled");
+                }
+            }).delegate(":radio[name^='header_value']", "change", function (e) {
+                //列数据源修改 复选框
+                var $tb = $(this).closest(".headerTable");
+                if ($(this).is("[header='value']")) {//回调函数单选钮
+                    $tb.find(":text[header='value']").attr("disabled", "disabled");
+                } else {
+                    $tb.find(":text[header='value']").removeAttr("disabled");
+                    $tb.find(".linkShowFn").addClass("disabled");
+                }
+            }).delegate(":checkbox[header='defaultValue']", "click", function () {
+                //列默认值
+                checkShowHide($(this), $(this).closest("td").find(":text[header='defaultValue']"));
+            }).delegate(":checkbox.chkRowHeader", "change", function () {
+                //字段行 复选框打钩 增加背景色
+                $(this).closest(".headerTable").toggleClass("bg");
+            }).delegate("select[header='cellType']", "change", function (e) {
+                //单元格类型 下拉选框 变更
+                var type = $(this).val();
+                var $tb = $(this).closest(".headerTable");
+                $tb.find("td *[celltype]").hide();
+                $tb.find("td *[celltype='" + type + "']").show();
+            }).delegate(".linkShowFn", "click", function (e) {
+                //点击 显示函数窗口按钮
+                var $lk = $(this);
+                if ($lk.is(".disabled")) return;
+                showFn($lk.siblings(".preFn").eq(0));
+            }).delegate(".btnAppend", "click", function (e) {
+                //每行的追加按钮
+                var $tb = $(this).closest(".headerTable");
+                var $newtb = $(this).closest(".headerTableList").find(".headerTable.template").clone().removeClass("template").show();
+                $tb.after($newtb);
+                headerNoReSort();
+            }).delegate(".btnDel", "click", function (e) {
+                //每行的删除按钮
+                var $tb = $(this).closest(".headerTable");
+                $tb.remove();
+                headerNoReSort();
+            });
+
+            //在编辑回调函数代码时，阻止回车事件触发，而关闭弹窗
+            $("body").delegate("pre", "keydown", function (e) {
+                //pre标签内按下Shift+Enter格式化代码
+                if (e.keyCode == 13 && e.shiftKey == true) {
+                    $(this).text(js_beautify($(this).text()));
+                    e.preventDefault();
+                }
+                //按下Tab键插入4个空格
+                if (e.keyCode == 9) {
+                    document.execCommand("insertHTML", false, "    ");
+                    e.preventDefault();
+                }
+                //单独按回车键插入一个换行符
+                if (e.keyCode == 13 && e.ctrlKey == false && e.shiftKey == false && e.altKey == false) {
+                    //document.execCommand("insertHTML", false, "");
+                    //e.preventDefault();
+                }
+            }).delegate(".preFn", "keydown", function (e) {
+                //在弹出框的函数编辑器中，按下回车阻止冒泡（防止冒泡到弹窗控件上而关闭窗口）
+                if (e.keyCode == 13 && e.ctrlKey == false) {
+                    e.stopPropagation();//但是按下Ctrl+回车 时允许关闭窗口，等同于按下确定按钮
+                }
+            });
+
+            //所有的函数属性复选框，当选中时显示Fn链接可用
+            $(document).delegate(".preFn+label input", "change", function (e) {
+                var $input = $(this);
+                if ($input.is(":not(:checkbox)") && $input.is(":not(:radio)")) return;
+                var $lk = $input.closest("label").nextAll(".linkShowFn");
+                if ($input.is(":checked")) {
+                    $lk.removeClass("disabled");
+                } else {
+                    $lk.addClass("disabled");
+                }
+            });
+
+            //表格字段 【添加】按钮
+            $(".btnAdd").click(function () {
+                var $lst = $(".headerTableList");
+                var $cloneTable = $(".headerTable.template").clone();
+                var no = -1;
+                //设置单选钮组
+                $cloneTable.find(":radio").attr("name", Math.random().toString(36).replace("0.", "header_value_"));
+                //设置编号
+                $cloneTable.find("tbody tr:eq(0) td:eq(0) strong").text(function () {
+                    no = parseInt($lst.find(".headerTable:last tbody tr:eq(0) td:eq(0) strong").text()) + 1;
+                    return no;
+                });
+                //设置列text
+                $cloneTable.find(":text[header='text']").val("第" + no + "列");
+
+                $lst.append($cloneTable.removeClass('template').show());
+            });
+
+            //【移除】按钮
+            $(".btnRemove").click(function () {
+                var rows = getAllHeader(true);
+                if (rows.length == 0) { alert("请先勾选要删除的行"); return; }
+                $.each(rows, function (i, r) {
+                    $(r).remove();
+                });
+                headerNoReSort();
+            });
+
+            //【上移】按钮
+            $(".btnUp").click(function () {
+                var rows = getAllHeader(true);
+                if (rows.length == 0) { alert("请先勾选要移动的行"); return; }
+                headerMove(rows, -1);
+                headerNoReSort();
+            });
+
+            //【下移】按钮
+            $(".btnDown").click(function () {
+                var rows = getAllHeader(true);
+                if (rows.length == 0) { alert("请先勾选要移动的行"); return; }
+                headerMove(rows, 1);
+                headerNoReSort();
+            });
+
+            //生成表格字段按钮
+            $(".btnCreateHeader").click(function () {
+                var serarr;
+                var serverDataStr = js_beautify($("#txtServerData").text()).replace(/\s/g, "");
+                try {
+                    serarr = JSON.parse(serverDataStr);
+                } catch (ex) {
+                    console.error(ex);
+                    alert("请粘贴正确的数据源！");
+                    return;
+                }
+                if ($.isArray(serarr) == false) {
+                    alert("请粘贴纯数组，即服务器返回JSON的Data数组部分");
+                    return;
+                }
+                //---create field--
+                $.each(getAllHeader(), function (i, r) { $(r).remove(); });
+                var obj = serarr[0];
+                $.each(obj, function (name, val) {
+                    $(".btnAdd").click();
+                    var $row = $(".headerTable:not(.template)").last();
+                    $row.find(":text[header='text']").val(name);
+                    $row.find(":text[header='field']").val(name);
+                    $row.find(":text[header='name']").val(name);
+                });
+                $("fieldset.fidHeaders").fadeOut().fadeIn();
+            });
+
+            //生成表格Config JSON
+            $(".btnCreateConfig").click(function () {
+                var cfg = {
+                    headers: [],
+                    toolbars: [],
+                    config: {}
+                };
+
+                //全局设定-config
+                cfg.config["isShowColHeader"] = $("#isShowColHeader").prop("checked");
+                cfg.config["isShowColHeaderText"] = $("#isShowColHeaderText").prop("checked");
+                cfg.config["isShowFooter"] = $("#isShowFooter").prop("checked");
+                cfg.config["isStaticPage"] = $("#isStaticPage").prop("checked");
+                cfg.config["isShowDefaultValue"] = $("#isShowDefaultValue").prop("checked");
+                cfg.config["defaultValue"] = $("#isShowDefaultValue").prop("checked") ? ("'" + $("#defaultValue").val() + "'") : undefined;
+
+                //翻页-pager
+                cfg["pager"] = $("#pager").prop("checked") ? {} : undefined;
+                if (cfg.pager) {
+                    cfg.pager["pageSize"] = parseInt($("#pageSize").val());
+                    //cfg.pager["navPageSize"] = parseInt($("#navPageSize").val());//暂时不写入，由全局控制
+                    cfg.pager["onBeforePageChange"] = $("#onBeforePageChange").prop("checked") ? getFnStr($("#onBeforePageChange")) : undefined;
+                    cfg.pager["onPageChanged"] = $("#onPageChanged").prop("checked") ? getFnStr($("#onPageChanged")) : undefined;
+                }
+
+                //复选框-checkable
+                cfg["checkable"] = $("#checkable").prop("checked") ? {} : undefined;
+                if (cfg.checkable) {
+                    cfg.checkable.checkbox = {};
+                    cfg.checkable.checkall = $("#isShowCheckall").prop("checked") ? {} : null;
+                    cfg.checkable["index"] = $("#checkableIndex").val().length == 0 ? undefined : parseInt($("#checkableIndex").val());
+                    cfg.checkable["width"] = $("#checkableWidth").val().length == 0 ? undefined : $("#checkableWidth").val();
+                    cfg.checkable["model"] = "window.jch.jGrid.checkableModelEnum." + ($("#single").prop("checked") ? "single" : $("#multiple").prop("checked") ? "multiple" : "none");
+                    //普通复选框
+                    cfg.checkable.checkbox["checked"] = $("#checkbox_checked").prop("checked");
+                    cfg.checkable.checkbox["enabled"] = $("#checkbox_enabled").prop("checked");
+                    cfg.checkable.checkbox["onBeforeCheckedChange"] = $("#checkbox_onBeforeCheckedChange").prop("checked") ? getFnStr($("#checkbox_onBeforeCheckedChange")) : undefined;
+                    cfg.checkable.checkbox["onCheckedChange"] = $("#checkbox_onCheckedChange").prop("checked") ? getFnStr($("#checkbox_onCheckedChange")) : undefined;
+                    cfg.checkable.checkbox["onBeforeEnabledChange"] = $("#checkbox_onBeforeEnabledChange").prop("checked") ? getFnStr($("#checkbox_onBeforeEnabledChange")) : undefined;
+                    cfg.checkable.checkbox["onEnabledChange"] = $("#checkbox_onEnabledChange").prop("checked") ? getFnStr($("#checkbox_onEnabledChange")) : undefined;
+
+                    //全选复选框
+                    if (cfg.checkable.checkall != null) {
+                        cfg.checkable.checkall["checked"] = $("#checkall_checked").prop("checked");
+                        cfg.checkable.checkall["enabled"] = $("#checkall_enabled").prop("checked");
+                        cfg.checkable.checkall["onBeforeCheckedChange"] = $("#checkall_onBeforeCheckedChange").prop("checked") ? getFnStr($("#checkall_onBeforeCheckedChange")) : undefined;
+                        cfg.checkable.checkall["onCheckedChange"] = $("#checkall_onCheckedChange").prop("checked") ? getFnStr($("#checkall_onCheckedChange")) : undefined;
+                        cfg.checkable.checkall["onBeforeEnabledChange"] = $("#checkall_onBeforeEnabledChange").prop("checked") ? getFnStr($("#checkall_onBeforeEnabledChange")) : undefined;
+                        cfg.checkable.checkall["onEnabledChange"] = $("#checkall_onEnabledChange").prop("checked") ? getFnStr($("#checkall_onEnabledChange")) : undefined;
+                    }
+                }
+
+                //展开-expand
+                cfg["expand"] = $("#expand").prop("checked") ? {} : undefined;
+                if (cfg.expand) {
+                    cfg.expand["model"] = "window.jch.jGrid.expandModelEnum." + ($("#expandSingle").prop("checked") ? "single" : $("#expandMultiple").prop("checked") ? "multiple" : "none");
+                    cfg.expand["index"] = $("#expandIndex").val().length == 0 ? undefined : parseInt($("#expandIndex").val());
+                    cfg.expand["width"] = $("#expandWidth").val().length == 0 ? undefined : $("#expandWidth").val();
+                    cfg.expand["onBeforeExpand"] = $("#onBeforeExpand").prop("checked") ? getFnStr($("#onBeforeExpand")) : undefined;
+                    cfg.expand["onExpand"] = $("#onExpand").prop("checked") ? getFnStr($("#onExpand")) : undefined;
+                    cfg.expand["onBeforeCollapse"] = $("#onBeforeCollapse").prop("checked") ? getFnStr($("#onBeforeCollapse")) : undefined;
+                    cfg.expand["onCollapse"] = $("#onCollapse").prop("checked") ? getFnStr($("#onCollapse")) : undefined;
+                }
+
+                //拖拽-drag
+                cfg["drag"] = $("#drag").prop("checked") ? {} : undefined;
+                if (cfg.drag) {
+                    cfg.drag["model"] = "window.jch.jGrid.dragModelEnum." + ($("#dragSingle").prop("checked") ? "single" : $("#dragMultiple").prop("checked") ? "multiple" : "none");
+                    cfg.drag["index"] = $("#dragIndex").val().length == 0 ? undefined : parseInt($("#dragIndex").val());
+                    cfg.drag["width"] = $("#dragWidth").val().length == 0 ? undefined : $("#dragWidth").val();
+                    cfg.drag["delegateSelector"] = $("#delegateSelector").val().length == 0 ? undefined : "'" + $("#delegateSelector").val() + "'";
+                    cfg.drag["onBeforeDrag"] = $("#onBeforeDrag").prop("checked") ? getFnStr($("#onBeforeDrag")) : undefined;
+                    cfg.drag["onDrag"] = $("#onDrag").prop("checked") ? getFnStr($("#onDrag")) : undefined;
+                    cfg.drag["onBeforeDrop"] = $("#onBeforeDrop").prop("checked") ? getFnStr($("#onBeforeDrop")) : undefined;
+                    cfg.drag["onDrop"] = $("#onDrop").prop("checked") ? getFnStr($("#onDrop")) : undefined;
+                    cfg.drag["onDragError"] = $("#onDragError").prop("checked") ? getFnStr($("#onDragError")) : undefined;
+                    cfg.drag["onDragComplete"] = $("#onDragComplete").prop("checked") ? getFnStr($("#onDragComplete")) : undefined;
+                }
+
+                //表格字段-headers
+                $.each(getAllHeader(), function (i, row) {
+                    var $row = $(row);
+                    var hd = {};
+                    hd["cellType"] = "jch.jGrid." + $row.find("[header='cellType']").val();
+                    hd["text"] = "'" + $row.find("[header='text']").val() + "'";
+                    hd["width"] = "'" + $row.find("[header='width']").val() + "'";
+                    hd["field"] = "'" + $row.find("[header='field']").val() + "'";
+                    hd["name"] = "'" + $row.find("[header='name']").val() + "'";
+                    hd["cellCb"] = $row.find("[header='cellCb']").prop("checked") ? getFnStr($row.find("[header='cellCb']")) : undefined;
+                    hd["cellHeaderCb"] = $row.find("[header='cellHeaderCb']").prop("checked") ? getFnStr($row.find("[header='cellHeaderCb']")) : undefined;
+                    hd["defaultValue"] = $row.find(":checkbox[header='defaultValue']").prop("checked") ? ("'" + $row.find(":text[header='defaultValue']").val() + "'") : undefined;
+                    hd["value"] = $row.find(":checkbox[header='value']").prop("checked") ? (
+                        $row.find(":radio[header='value']").prop("checked") ?
+                            getFnStr($row.find(":radio[header='value']")) :
+                            "'" + $row.find(":text[header='value']").val() + "'"
+                    ) : undefined;
+                    $.each($row.find("[celltype='" + $row.find("[header='cellType']").val() + "']"), function (j, h) {
+                        var $h = $(h);//根据选择的单元格类型追加的附属字段属性
+                        var name = $h.find("[header]").attr("header");
+                        hd[name] = "'" + $h.find("[header]").val() + "'";
+                    });
+
+
+                    if (hd.cellType == "jch.jGrid.jCellToolBar") {
+                        //追加入工具栏toolbars数组
+                        cfg.toolbars.push(hd);
+                    } else {
+                        //追加入headers数组
+                        cfg.headers.push(hd);
+                    }
+                });
+
+
+                var cfgStr = JSON.stringify(cfg);
+
+                cfgStr = js_beautify(cfgStr.replace(/"/g, "").replace(/'/g, "\""));
+                //cfgStr = "var createConfig=" + cfgStr + ";" +
+                //    "var serverDataSource=" + $("#txtServerData").text()+";" +
+                //    "var jgrid=window.jch.jGrid(createConfig)" +
+                //    "jgrid.setData(serverDataSource)";
+                $(".configStr").text(cfgStr);
+
+                //切换到 生成的config的Tab页面
+                tabGotoPage(1);
+                $(".configStr").fadeOut().fadeIn();
+                $(".btnCreateTable").click();
+            });
+
+            //生成表格
+            $(".btnCreateTable").click(function () {
+                try {
+                    eval("window.createConfig=" + $(".configStr").text());
+                    eval("window.serverDataSource=" + $("#txtServerData").text());
+                    window.jgrid = window.jch.jGrid(window.createConfig);
+                    $(".tableDemo").empty().append(jgrid.element);
+                    jgrid.setData(window.serverDataSource, 1, window.serverDataSource.length);
+                    tabGotoPage(2);
+                }
+                catch (e) {
+                    console.log(e);
+                    alert(e); return;
+                }
+            });
+
+            //#region jGrid
+            //var jch = window.jch;
+            //var myCheckall = window.jch.jCheckBox();
+            //var myCheckallSubArr = [];
+            //window.serverDataObject = {
+            //    Data: [{
+            //        QaTitle: "新的医保可以报销么？",
+            //        SubmitTime: 1427614397257,
+            //        AnsTime: 1427614597784,
+            //        AnsName: "张老师",
+            //        IsAns: true,
+            //        Other: {
+            //            OtherData1: 2,
+            //            OtherData2: 3
+            //        }
+            //    }, {
+            //        QaTitle: "肚子痛是怎么回事我小肚子经常会突然痛？",
+            //        SubmitTime: 1427614597784,
+            //        AnsTime: 0,
+            //        AnsName: "",
+            //        IsAns: false,
+            //        Other: {
+            //            OtherData1: 2,
+            //            OtherData2: 3
+            //        }
+            //    }, {
+            //        QaTitle: "新上线药品治疗早期肿瘤有效果吗？",
+            //        SubmitTime: 1427614397257,
+            //        AnsTime: 1427614597784,
+            //        AnsName: "刘主任",
+            //        IsAns: true,
+            //        Other: {
+            //            OtherData1: 2,
+            //            OtherData2: 3
+            //        }
+            //    }, {
+            //        QaTitle: "肚子痛是怎么回事我小肚子经常会突然痛2？",
+            //        SubmitTime: 1427614597784,
+            //        AnsTime: 0,
+            //        AnsName: "",
+            //        IsAns: false,
+            //        Other: {
+            //            OtherData1: 2,
+            //            OtherData2: 3
+            //        }
+            //    }, {
+            //        QaTitle: "肚子痛是怎么回事我小肚子经常会突然痛3？",
+            //        SubmitTime: 1427614597784,
+            //        AnsTime: 1427614597784,
+            //        AnsName: "大老王",
+            //        IsAns: false,
+            //        Other: {
+            //            OtherData1: 2,
+            //            OtherData2: 3
+            //        }
+            //    }],
+            //    TotalCountNum: 5
+            //};
+            //var config = {
+            //    //element: $(".demoTable"),
+            //    headers: [{
+            //        width: "50px",
+            //        value: function (c, r) { return "第" + (this.row.rowIndex + 1) + "条"; }
+            //    }, {
+            //        text: "图片",
+            //        width: "80px",
+            //        cellType: jch.jGrid.jCellIcon,
+            //        value: "images/icon.png"
+            //    }, {
+            //        field: "QaTitle",
+            //        text: "提问/复合型 标题单元格",
+            //        cellType: jch.jGrid.jCellComplexTitle,
+            //        colspan: 2
+            //    }, {
+            //        field: "SubmitTime",
+            //        text: "提交时间",
+            //        width: "40%",
+            //        cellType: jch.jGrid.jCellComplexField,
+            //        value: function (cdata) { return cdata == 0 ? "-" : new Date(cdata).toLocaleString(); }
+            //    }, {
+            //        field: "AnsTime",
+            //        text: "解答时间",
+            //        width: "60%",
+            //        cellType: jch.jGrid.jCellComplexField,
+            //        value: function (cdata) { return cdata == 0 ? "-" : new Date(cdata).toLocaleString(); }
+            //    }, {
+            //        text: "单选钮",
+            //        width: "70px",
+            //        field: "IsAns",
+            //        cellType: jch.jGrid.jCellRadio,
+            //        cellCb: function (c, r, jcb) {
+            //            jcb.enabled(false);
+            //        }
+            //    }, {
+            //        field: "IsAns",
+            //        text: "双行字段",
+            //        width: "100px",
+            //        cellType: jch.jGrid.jCellField
+            //        //value: "数值"
+            //    }, {
+            //        field: "IsAns",
+            //        text: "复选框",
+            //        width: "100px",
+            //        cellType: jch.jGrid.jCellCheckBox,
+            //        cellHeaderCb: function () {
+            //            this.element.prepend(myCheckall.element).css("margin-left", "8px");
+            //        },
+            //        cellCb: function (c, r, jcb) {
+            //            //jcb.enabled(false);
+            //            myCheckallSubArr.push(jcb);
+            //        }
+            //    }, {
+            //        field: "IsAns",
+            //        text: "图标+文字",
+            //        cellType: jch.jGrid.jCellIconText,
+            //        width: "150px",
+            //        value: function (c) {
+            //            return {
+            //                icon: c ? "images/Button_Enabled.png" : "images/Button_Disabled_Yellow.png",
+            //                text: c ? "已解答" : "未解答"
+            //            };
+            //        },
+            //        cellCb: function (c, r, icon, text) {
+            //            text.css("color", this.orgCellData ? "rgb(0,149,217)" : "rgb(241,196,18)");
+            //        }
+            //    }, {
+            //        width: "10%",
+            //        text: "按钮",
+            //        cellType: jch.jGrid.jCellButton,
+            //        value: "移除",
+            //        cellCb: function (cdata, rdata, btn) {
+            //            //console.log("jCellButton cellCb", btn)
+            //            btn.click(function () {
+            //                console.log(rdata);
+            //            });
+            //        }
+            //    }],
+            //    checkable: {
+            //        model: jch.jGrid.checkableModelEnum.multiple,
+            //        checkbox: {
+            //            checked: function (cdata, rdata, cell) {
+            //                return cell.row.rowIndex == 0;
+            //            },
+            //            enabled: function (cdata, rdata, cell) {
+            //                //console.log("enabled",arguments);
+            //                return cell.row.rowIndex > 1;
+            //            },
+            //            onCheckedChange: function (ischk) {
+            //                console.log("onCheckedChange", this, arguments);
+            //                //console.log(ischk, i, cdata, rdata);
+            //            }
+            //        },
+            //        checkall: {
+            //            checked: function () {
+            //                //console.log("checkall-checked", this, arguments);
+            //                return false;
+            //            },
+            //            enabled: true
+            //        }
+            //    },
+            //    pager: {
+            //        onBeforePageChange: function (dstIndex, curIndex) {
+            //            myCheckallSubArr.length = 0;
+            //            //console.log("翻页后页码：", dstIndex);
+            //            //console.log("翻页前页码：", curIndex);
+            //            //return false;
+            //        },
+            //        onPageChanged: function (currIndex) {
+            //            console.log(myCheckallSubArr)
+            //            myCheckall.initCheckAllMode(myCheckallSubArr);
+            //        },
+            //        pageSize: 4,
+            //        navPageSize: 5
+            //    },
+            //    config: {
+            //        isShowColHeaderText: true,//是否显示列头文字
+            //        isShowColHeader: true,//是否显示列头行
+            //        isStaticPage: true//true前端分页，false后台分页
+            //    }
+            //};
+
+            //window.jgrid = window.jch.jGrid(config);
+            //$(".tableDemo").append(jgrid.element);
+            //jgrid.setData(serverDataObject.Data.repeat(10));
+            //myCheckall.initCheckAllMode(myCheckallSubArr);
+
+
+
+            //#endregion
+
+            //#region Tools
+
+            function showFn($pre) {
+                var $pop = $pre.clone(true).show();
+                var $lb = $pre.siblings("label");
+                var title = $lb.text() + ($lb.find("input").attr("header") || $lb.find("input").attr("id"));
+                $pop.html(core.htmlEncode($pop.text()).replace(/&nbsp;/g, " ").replace(/\n/g, "<br/>"));
+                wxc.xcConfirm($pop, null, {
+                    title: title,
+                    onClose: function (type) {
+                        if (type == wxc.xcConfirm.eventEnum.ok) {
+                            if ($pop.text().indexOf("'") >= 0) {
+                                alert("由于转码原因，请勿输入单引号");
+                                return;
+                            }
+                            $pop.text(js_beautify($pop.text()));
+                            $pre.replaceWith($pop.hide());
+                            if ($(".runtimeEdit").is(":checked")) {
+                                $(".btnCreateConfig").click();
+                            }
+                        } else {
+                            //console.log("close");
+                        }
+                    }
+                });
+            }
+
+            //根据label中的input元素获取紧邻后方的 函数代码块pre元素值。
+            function getFnStr($labelInput) {
+                return $labelInput.closest("td").find(".preFn").eq(0).text().replace(/\n/g, "").replace(/"/g, "'");
+            }
+
+            function checkShowHide($chk, $dst) {
+                if ($chk.is(":checked")) {
+                    $dst.removeAttr("disabled");//.removeClass("disabled")
+                } else {
+                    $dst.val("").attr("disabled", "disabled");//.addClass("disabled")
+                }
+            }
+
+            //获取所有打钩的行，isChecked不传为获取所有行
+            function getAllHeader(isChecked) {
+                var result = $(".headerTableList").find(".chkRowHeader").filter(function (i, chk) {
+                    if (typeof (isChecked) == "boolean") {
+                        return chk.checked == isChecked;
+                    } else {
+                        return true;
+                    }
+                }).closest("table.headerTable:not(.template)");
+                return result;
+            }
+
+            //表格重新生成编号
+            function headerNoReSort() {
+                var $headers = $(".headerTableList .headerTable:not(.template)");
+                var selector = "tbody tr:eq(0) td:eq(0) strong";
+                $.each($headers, function (i, tb) {
+                    var prevNo = $(".headerTableList .headerTable").eq(i).find(selector).text();
+                    $(tb).find(selector).text(parseInt(prevNo) + 1);
+                });
+            }
+
+            //行移动
+            function headerMove(moveHeaders, dst) {
+                var $lst = $(".headerTableList");
+                var $headers = $lst.find(".headerTable:not(.template)");
+                if (moveHeaders.length == 0) return;
+                $.each(moveHeaders, function (i, hd) {
+                    var $hd = moveHeaders.eq(dst < 0 ? i : moveHeaders.length - i - 1);
+                    $headers = $lst.find(".headerTable:not(.template)");
+                    if ($.inArray($hd[dst > 0 ? "next" : "prev"]()[0], moveHeaders) >= 0) {
+                        return true;
+                    }
+                    if (dst < 0) {
+                        if ($headers.index($hd) == 0) return true;
+                        if ($headers.index($hd) <= Math.abs(dst)) {
+                            $(".headerTable.template").after($hd);
+                        } else {
+                            $headers.eq($headers.index($hd) - Math.abs(dst)).before($hd);
+                        }
+                    } else if (dst > 0) {
+                        if ($headers.index($hd) == $headers.length - 1) return true;
+                        if ($headers.index($hd) + dst >= $headers.length - 1) {
+                            $lst.append($hd);
+                        } else {
+                            $headers.eq($headers.index($hd) + dst).after($hd);
+                        }
+                    }
+                });
+
+            }
+
+            //字段框收缩
+            function fieldsetCollapse($fid) {
+                $fid.attr("height", function () { return $(this).height(); });
+                $fid.animate({ "height": 0 });
+                return $fid;
+            }
+
+            //字段框展开
+            function fieldsetExpand($fid) {
+                $fid.animate({ "height": $fid.attr("height") }, function () {
+                    $(this).css("height", "");
+                });
+                return $fid;
+            }
+
+            //链接展开收缩功能
+            function fieldExpColl(e) {
+                if ($(this).text().indexOf("收缩") >= 0) {
+                    $(this).text(" 展开▼");
+                    fieldsetCollapse($(this).closest("fieldset"));
+                } else {
+                    $(this).text(" 收缩▲");
+                    fieldsetExpand($(this).closest("fieldset"));
+                }
+            }
+
+            //跳转到显示某个tab页面
+            function tabGotoPage(index) {
+                window.jch.staticPage[$(".tabControl").attr("tabcontrolname")].naviPage(null, index);
+            }
+
+
+            //#endregion
+        });
+    </script>
+    <style>
+        a { cursor: pointer; }
+        h1 { padding: 10px; margin: 0; background-color: rgb(250, 250, 250); }
+        body { font-family: "微软雅黑"; font-size: 13px; margin: 0 8px; }
+        table { width: 100%; border-collapse: collapse; border-spacing: 0; }
+        /*td,th{ border-collapse: collapse;}*/
+        strong { font-size: 15px; }
+        select, input[type='text'], input[type='number'] { max-width: 120px; }
+        /*input[type='number'] { width: 50px; }*/
+        fieldset { overflow: hidden; padding: 5px 10px; min-height: 10px; }
+        .disabled { background-color: rgb(240, 240, 240); }
+        .headerTable { border-top: 1px solid gray; }
+        .headerTable.bg { background-color: rgb(250,250,250); }
+        .headerTable thead tr { height: 10px; }
+        jch.jGrid可视化编辑器 Beta_0412 .headerTable tfoot tr { height: 10px; }
+        .labelRowHeader { width: 100%; height: 90px; line-height: 90px; display: block; }
+        .linkExpColl { text-decoration: none; color: rgb(0,149,217); }
+        .jGrid thead .checkallLabel { position: inherit; }
+        [celltype='jCellColHeader']:first-child { overflow-y: inherit; }
+
+        /*字符按钮*/
+        .charBtn { color: rgb(0,149,217); width: 21px; display: inline-block; text-align: center; background-color: rgb(240,240,240); border: 1px solid rgb(172,172,172); cursor: pointer; margin-bottom: 1px; }
+        .charBtn:hover { color: ButtonText; background-color: rgb(228, 240, 252); border: 1px solid rgb(0,149,217); }
+
+        /*TabControls*/
+        .tabControl .tabTitleList { border-bottom: 1px solid rgb(240,240,240); }
+        .tabControl .tabTitleList a:hover { color: rgb(0,149,217); }
+        .tabControl { height: 100%; }
+        .tabControl .tabPageList { border: 2px groove threedface; height: calc(100% - 45px ); }
+        .tabControl .tabPage { height: 100%; }
+
+        /*布局*/
+        #content { width: 100%; margin-left: -720px; float: left; }
+        #trueLeft { margin-left: 720px; height: 100%; }
+        #right { width: 700px; float: left; padding-left: 20px; }
+
+        /*jGrid*/
+        .pageBox { overflow: hidden; width: 100%; border: 1px solid rgb(238, 240, 241); padding: 5px 0; }
+        .borderRadius { background: white; border: 1px solid rgb(238, 240, 241); display: inline-block; margin: 10px; padding: 10px; cursor: pointer; }
+        .borderChecked { background-color: rgb(61, 171, 246); color: white; }
+
+        /*代码编辑*/
+        .toolBar { background: none repeat scroll 0 0 #eee; height: 30px; line-height: 30px; padding: 0 10px; }
+        pre { white-space: pre-wrap; word-wrap: break-word; word-break: break-all; margin: 0; height: calc(100% - 30px); overflow-y: scroll; font-family: "Consolas","Lucida Console","微软雅黑"; font-size: 15px; }
+        .tableDemo, form { height: calc(100% - 30px); overflow-y: scroll; }
+
+        /*回调函数编辑 xcConfirm*/
+        .linkShowFn { color: blue; cursor: pointer; text-decoration: underline; }
+        .linkShowFn.disabled { color: gray; background-color: inherit; cursor: default; }
+        .preFn { height: 300px; width: 570px; font-weight: normal; }
+        .SFA .xcConfirm .popBox { height: inherit; min-height: 300px; min-width: 570px; width: inherit; }
+        .xcConfirm .popBox .btnArea { overflow: hidden; }
+        .xcConfirm .popBox .btnGroup .sgBtn { margin-bottom: 14px; }
+        .xcConfirm .popBox .txtBox { margin: 0; width: 100%; height: 100%; }
+        .xcConfirm .popBox .txtBox p { margin: 10px; float: none; line-height: inherit; width: inherit; height: inherit; }
+        .xcConfirm .popBox .ttBox { line-height: 50px; }
+    </style>
+</head>
+<body class="SFA">
+
+    <div id="header">
+        <h1>jch.jGrid可视化编辑器 Beta_0716</h1>
+    </div>
+    <div id="content">
+        <div id="trueLeft">
+            <div class="tabControl">
+                <div class="tabTitleList">
+                    <div class="tabTitle" title="表示服务器返回的数据源对象"><a class="active">数据源</a></div>
+                    <div class="tabTitle" title="表示创建生成表格的config代码"><a class="">表格代码</a></div>
+                    <div class="tabTitle" title="表示根据表格config及所设定的数据源的最终展现效果"><a class="">表格展示</a></div>
+                </div>
+                <div class="tabPageList">
+                    <div class="tabPage">
+                        <div class="toolBar">
+                            <span>将服务器返回的数据的<b>Data数组</b>粘贴在此。</span>
+                            <input type="button" value="格式化代码" onclick="$('#txtServerData').text(js_beautify($('#txtServerData').text()));" />
+                            <input class="btnCreateHeader" type="button" value="生成表格字段→" style="color: red;" title="将服务器返回的数据对象自动识别生成表格的字段" />
+                        </div>
+                        <pre id="txtServerData" contenteditable="true">
+[{
+        "QaTitle": "新的医保可以报销么？",
+        "SubmitTime": 1427614397257,
+        "AnsTime": 1427614597784,
+        "AnsName": "张老师",
+        "IsAns": true,
+        "Other": {
+            "OtherData1": 2,
+            "OtherData2": 3
+        }
+    }, {
+        "QaTitle": "肚子痛是怎么回事我小肚子经常会突然痛？",
+        "SubmitTime": 1427614597784,
+        "AnsTime": 0,
+        "AnsName": "",
+        "IsAns": false,
+        "Other": {
+            "OtherData1": 2,
+            "OtherData2": 3
+        }
+    }, {
+        "QaTitle": "新上线药品治疗早期肿瘤有效果吗？",
+        "SubmitTime": 1427614397257,
+        "AnsTime": 1427614597784,
+        "AnsName": "刘主任",
+        "IsAns": true,
+        "Other": {
+            "OtherData1": 2,
+            "OtherData2": 3
+        }
+    }, {
+        "QaTitle": "肚子痛是怎么回事我小肚子经常会突然痛2？",
+        "SubmitTime": 1427614597784,
+        "AnsTime": 0,
+        "AnsName": "",
+        "IsAns": false,
+        "Other": {
+            "OtherData1": 2,
+            "OtherData2": 3
+        }
+    }, {
+        "QaTitle": "肚子痛是怎么回事我小肚子经常会突然痛3？",
+        "SubmitTime": 1427614597784,
+        "AnsTime": 1427614597784,
+        "AnsName": "大老王",
+        "IsAns": false,
+        "Other": {
+            "OtherData1": 2,
+            "OtherData2": 3
+        }
+    },{
+        "QaTitle": "新的医保可以报销么？",
+        "SubmitTime": 1427614397257,
+        "AnsTime": 1427614597784,
+        "AnsName": "张老师",
+        "IsAns": true,
+        "Other": {
+            "OtherData1": 2,
+            "OtherData2": 3
+        }
+    }, {
+        "QaTitle": "肚子痛是怎么回事我小肚子经常会突5然痛？",
+        "SubmitTime": 1427614597784,
+        "AnsTime": 0,
+        "AnsName": "",
+        "IsAns": false,
+        "Other": {
+            "OtherData1": 2,
+            "OtherData2": 3
+        }
+    }, {
+        "QaTitle": "新上线药品治疗早期肿瘤有效果吗？",
+        "SubmitTime": 1427614397257,
+        "AnsTime": 1427614597784,
+        "AnsName": "刘主任",
+        "IsAns": true,
+        "Other": {
+            "OtherData1": 2,
+            "OtherData2": 3
+        }
+    }, {
+        "QaTitle": "肚子痛是怎么回事我小肚子经常会突然痛2？",
+        "SubmitTime": 1427614597784,
+        "AnsTime": 0,
+        "AnsName": "",
+        "IsAns": false,
+        "Other": {
+            "OtherData1": 2,
+            "OtherData2": 3
+        }
+    }]
+</pre>
+                    </div>
+                    <div class="tabPage">
+                        <div class="toolBar">
+                            <span>按下 Shift+回车 键可格式化代码</span>
+                            <input type="button" value="格式化代码" onclick="$('.configStr').text(js_beautify($('.configStr').text()));" />
+                            <input class="btnCreateTable" type="button" value="生成表格" />
+                        </div>
+                        <pre class="configStr" contenteditable="true">请点击右侧的[生成表格]按钮来生成jGrid的config代码</pre>
+                    </div>
+                    <div class="tabPage ">
+                        <div class="toolBar">
+                            <span>请在右侧编辑表格配置，然后点击[生成表格]按钮</span>
+                        </div>
+                        <div class="tableDemo"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="right">
+        <div class="tabControl">
+            <div class="tabTitleList">
+                <div class="tabTitle"><a class="active">表格设置</a></div>
+                <div class="tabTitle"><a class="">setting</a></div>
+            </div>
+            <div class="tabPageList">
+                <div class="tabPage">
+                    <div class="toolBar">
+                        <input type="reset" value="重置设定" onclick="location.reload(true);" />
+                        <input type="button" value="全部收缩" onclick="$('.linkExpColl').filter(function () { return $(this).text().indexOf('收缩') >= 0; }).click();" />
+                        <input type="button" value="全部展开" onclick="$('.linkExpColl').filter(function () { return $(this).text().indexOf('展开') >= 0; }).click();" />
+                        <label>
+                            <input class="runtimeEdit" type="checkbox" />实时编辑</label>
+                        <input class="btnCreateConfig" type="button" value="←生成表格" style="float: right; color: red; font-weight: bold;" />
+                    </div>
+                    <form class="formConfig">
+                        <!--<div style="height: 24px;"></div>-->
+                        <!--<br />-->
+                        <fieldset>
+                            <legend>全局设定</legend>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th style="width: 33%;"></th>
+                                        <th style="width: 33%;"></th>
+                                        <th style="width: 33%;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <label title="是否显示整个表格的列头行(第一行)">
+                                                <input id="isShowColHeader" type="checkbox" checked="checked" />是否显示列头行
+                                            </label>
+                                        </td>
+                                        <td>
+                                            <label title="是否显示每一列在列顶部中的文字，文字内容由下方设置表格字段中的[列的说明]来定义">
+                                                <input id="isShowColHeaderText" type="checkbox" checked="checked" />是否显示列头文字
+                                            </label>
+                                        </td>
+                                        <td>
+                                            <label title="是否显示页脚行(最后一行翻页行)，注意在只有在启用了翻页此选项才有效，在不启用翻页时默认不显示页脚行">
+                                                <input id="isShowFooter" type="checkbox" checked="checked" />是否显示页脚行
+                                            </label>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <label title="使用前端分页表示后台传输的数据为所有页数据，即接口.setData(d)中的d是所有页数据，由jGrid来实现分页；不使用前端分页表示后台传输的数据为单页数据，即接口.setData(d)中的d是当前页的数据，您可能需要注册翻页事件(onBeforePageChange)来动态向后台请求加载其他页数据。注意本选项只在启用了翻页后才生效">
+                                                <input id="isStaticPage" type="checkbox" />是否前端分页
+                                            </label>
+                                        </td>
+                                        <td>
+                                            <label title="当数据源中的数据无法转换为字符串时(如null,undefined,''等)，是否显示默认值">
+                                                <input id="isShowDefaultValue" type="checkbox" />是否显示单元格默认值
+                                            </label>
+                                        </td>
+                                        <td>
+                                            <label title="当数据源中的数据无法转换为字符串时，显示在单元格中的默认文字。注意本选项允许被具体单元格设定的默认值所覆盖">
+                                                单元格默认值<input id="defaultValue" type="text" value="-" disabled="disabled" />
+                                            </label>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </fieldset>
+                        <br />
+                        <fieldset>
+                            <legend>
+                                <label title="是否启用表格的翻页功能">
+                                    <input id="pager" type="checkbox" checked="checked" />启用翻页
+                                </label>
+                            </legend>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th style="width: 33%;"></th>
+                                        <th style="width: 33%;"></th>
+                                        <th style="width: 33%;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>字段</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <label title="每一页显示的数据条数(行数)">
+                                                每页行数<input id="pageSize" type="number" value="4" min="1" />
+                                            </label>
+                                        </td>
+                                        <td>
+                                            <label title="表示在页码行中最多显示几个页码标签，即翻页的翻页">
+                                                页码数量<input id="navPageSize" type="number" value="5" disabled="disabled" min="1" />
+                                            </label>
+                                        </td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>事件</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <pre class="preFn" style="display: none;" contenteditable="true">
+function(dstIndex, currIndex){
+    console.log("onBeforePageChange",this,arguments);
+}
+</pre>
+                                            <label title="当点击页码界面切换前触发，可以返回false来阻止翻页。可用于当前页仍有未完成操作时阻止用户翻页时使用">
+                                                <input id="onBeforePageChange" type="checkbox" />翻页前事件
+                                            </label>
+                                            <a class="linkShowFn disabled">Fn</a>
+                                        </td>
+                                        <td>
+                                            <pre class="preFn" style="display: none;" contenteditable="true">
+function(currIndex){
+    console.log("onPageChanged",this,arguments);
+}
+</pre>
+                                            <label title="当点击页面且界面切换完成后触发">
+                                                <input id="onPageChanged" type="checkbox" />翻页后事件
+                                            </label>
+                                            <a class="linkShowFn disabled">Fn</a>
+                                        </td>
+                                        <td></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </fieldset>
+                        <br />
+                        <fieldset>
+                            <legend>
+                                <label title="是否启用每行的复选框">
+                                    <input id="checkable" type="checkbox" checked="checked" />启用复选框
+                                </label>
+                            </legend>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th style="width: 33%;"></th>
+                                        <th style="width: 33%;"></th>
+                                        <th style="width: 33%;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <span title="">模式：</span>
+                                            <label title="表格使用单选钮列，注意使用单选模式将不再显示[全选]钮">
+                                                <input id="single" type="radio" name="checkableModel" />单选
+                                            </label>
+                                            <label title="表格使用多选钮列">
+                                                <input id="multiple" type="radio" name="checkableModel" checked="checked" />多选
+                                            </label>
+                                        </td>
+                                        <td>
+                                            <label title="是否在列头行显示[全选]钮即全选文字">
+                                                <input id="isShowCheckall" type="checkbox" checked="checked" />是否显示全选复选框
+                                            </label>
+                                        </td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <label title="将复选框或单选钮生成到第几列，不填写为生成到第一列">
+                                                复选框列位置<input id="checkableIndex" type="number" value="" min="0" />
+                                            </label>
+                                        </td>
+                                        <td>
+                                            <label title="设定复选框列的宽度，不设定为默认宽度">
+                                                复选框列宽度<input id="checkableWidth" type="text" value="" />
+                                            </label>
+                                        </td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>行头复选框</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <label title="表格每行的复选框是否默认选中。注意使用单选钮模式不能使用此选项">
+                                                <input id="checkbox_checked" type="checkbox" />是否选中
+                                            </label>
+                                        </td>
+                                        <td>
+                                            <label title="表格每行的复选框或单选项是否默认可用">
+                                                <input id="checkbox_enabled" type="checkbox" checked="checked" />是否可用
+                                            </label>
+                                        </td>
+                                        <td>
+                                            <pre class="preFn" style="display: none;" contenteditable="true">
+function(chkState, e, cdata, rdata, cell){
+    console.log("checkbox_onBeforeCheckedChange",this,arguments);
+}
+</pre>
+                                            <label title="当复选框或单选钮的选中(checked)属性变更时在界面切换前触发，可返回false阻止事件触发。注意当单选模式时，被取消选择的单选钮也会触发此事件">
+                                                <input id="checkbox_onBeforeCheckedChange" type="checkbox" />选中变更前事件
+                                            </label>
+                                            <a class="linkShowFn disabled">Fn</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <pre class="preFn" style="display: none;" contenteditable="true">
+function(chkState, e, cdata, rdata, cell){
+    console.log("checkbox_onCheckedChange",this,arguments);
+}
+</pre>
+                                            <label title="当复选框或单选钮的选中(checked)属性变更时且界面切换完成后触发。注意当单选模式时，被取消选择的单选钮也会触发此事件">
+                                                <input id="checkbox_onCheckedChange" type="checkbox" />选中变更后事件
+                                            </label>
+                                            <a class="linkShowFn disabled">Fn</a>
+                                        </td>
+                                        <td>
+                                            <pre class="preFn" style="display: none;" contenteditable="true">
+function(enbState, cdata, rdata, cell){
+    console.log("checkbox_onBeforeEnabledChange",this,arguments);
+}
+</pre>
+                                            <label title="当复选框或单选钮的可用(enabled)属性变更时在界面切换前触发，可返回false来阻止事件触发">
+                                                <input id="checkbox_onBeforeEnabledChange" type="checkbox" />可用性变更前事件
+                                            </label>
+                                            <a class="linkShowFn disabled">Fn</a>
+                                        </td>
+                                        <td>
+                                            <pre class="preFn" style="display: none;" contenteditable="true">
+function(enbState, cdata, rdata, cell){
+    console.log("checkbox_onEnabledChange",this,arguments);
+}
+</pre>
+                                            <label title="当复选框或单选钮的可用(enabled)属性变更时且界面切换完成后触发">
+                                                <input id="checkbox_onEnabledChange" type="checkbox" />可用性变更后事件
+                                            </label>
+                                            <a class="linkShowFn disabled">Fn</a>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td><strong>全选复选框</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <label title="全选钮默认是否选中">
+                                                <input id="checkall_checked" type="checkbox" />是否选中
+                                            </label>
+                                        </td>
+                                        <td>
+                                            <label title="全选钮默认是否可用">
+                                                <input id="checkall_enabled" type="checkbox" checked="checked" />是否可用
+                                            </label>
+                                        </td>
+                                        <td>
+                                            <pre class="preFn" style="display: none;" contenteditable="true">
+function(chkState, e){
+    console.log("checkall_onBeforeCheckedChange",this,arguments);
+}
+</pre>
+                                            <label>
+                                                <input id="checkall_onBeforeCheckedChange" type="checkbox" />选中变更前事件
+                                            </label>
+                                            <a class="linkShowFn disabled">Fn</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <pre class="preFn" style="display: none;" contenteditable="true">
+function(chkState, e){
+    console.log("checkall_onCheckedChange",this,arguments);
+}
+</pre>
+                                            <label>
+                                                <input id="checkall_onCheckedChange" type="checkbox" />选中变更后事件
+                                            </label>
+                                            <a class="linkShowFn disabled">Fn</a>
+                                        </td>
+                                        <td>
+                                            <pre class="preFn" style="display: none;" contenteditable="true">
+function(enbState){
+    console.log("checkall_onBeforeEnabledChange",this,arguments);
+}
+</pre>
+                                            <label>
+                                                <input id="checkall_onBeforeEnabledChange" type="checkbox" />可用性变更前事件
+                                            </label>
+                                            <a class="linkShowFn disabled">Fn</a>
+                                        </td>
+                                        <td>
+                                            <pre class="preFn" style="display: none;" contenteditable="true">
+function(enbState){
+    console.log("checkall_onEnabledChange",this,arguments);
+}
+</pre>
+                                            <label>
+                                                <input id="checkall_onEnabledChange" type="checkbox" />可用性变更后事件
+                                            </label>
+                                            <a class="linkShowFn disabled">Fn</a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </fieldset>
+                        <br />
+                        <fieldset>
+                            <legend>
+                                <label title="是否启用每一行的展开功能">
+                                    <input id="expand" type="checkbox" checked="checked" />启用行展开
+                                </label>
+                            </legend>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th style="width: 33%;"></th>
+                                        <th style="width: 33%;"></th>
+                                        <th style="width: 33%;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <span>模式：</span>
+                                            <label title="表示在同一时刻最多只允许有一行处于展开状态">
+                                                <input id="expandSingle" type="radio" name="expandModel" checked="checked" />单行展开
+                                            </label>
+                                            <label title="表示允许多个行可以同时处于展开状态">
+                                                <input id="expandMultiple" type="radio" name="expandModel" />多行展开
+                                            </label>
+                                        </td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <label title="将展开按钮生成到第几列，不填写为生成到最后一列">
+                                                展开列位置<input id="expandIndex" type="number" value="" min="0" />
+                                            </label>
+                                        </td>
+                                        <td>
+                                            <label title="设定展开按钮列的宽度，不设定为默认宽度">
+                                                展开列宽度<input id="expandWidth" type="text" value="" />
+                                            </label>
+                                        </td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>事件</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <pre class="preFn" style="display: none;" contenteditable="true">
+function(rdata){
+    console.log("onBeforeExpand",this,arguments);
+}
+</pre>
+                                            <label title="当准备行展开在界面切换前触发，可返回false阻止行展开">
+                                                <input id="onBeforeExpand" type="checkbox" />当展开前触发
+                                            </label>
+                                            <a class="linkShowFn disabled">Fn</a>
+                                        </td>
+                                        <td>
+                                            <pre class="preFn" style="display: none;" contenteditable="true">
+function(rdata,expcell){
+    console.log("onExpand",this,arguments);
+}
+</pre>
+                                            <label title="当行展开后界面切换完成后触发，可用于向展开行内写入要展开的内容">
+                                                <input id="onExpand" type="checkbox" />当展开后触发
+                                            </label>
+                                            <a class="linkShowFn disabled">Fn</a>
+                                        </td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <pre class="preFn" style="display: none;" contenteditable="true">
+function(rdata,expcell){
+    console.log("onBeforeCollapse",this,arguments);
+}
+</pre>
+                                            <label title="当准备行折叠(关闭)在界面切换前触发，可返回false阻止行折叠(关闭)。注意当[单行展开]模式下，展开其他行会先触发当前已展开行的此事件，若返回false也会阻止其他行的展开操作">
+                                                <input id="onBeforeCollapse" type="checkbox" />当折叠前触发
+                                            </label>
+                                            <a class="linkShowFn disabled">Fn</a>
+                                        </td>
+                                        <td>
+                                            <pre class="preFn" style="display: none;" contenteditable="true">
+function(rdata){
+    console.log("onCollapse",this,arguments);
+}
+</pre>
+                                            <label title="当行折叠(关闭)后界面切换完成后触发。注意当[单行展开]模式下，展开其他行会先触发当前已展开行的此事件">
+                                                <input id="onCollapse" type="checkbox" />当折叠后触发
+                                            </label>
+                                            <a class="linkShowFn disabled">Fn</a>
+                                        </td>
+                                        <td></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </fieldset>
+
+                        <br />
+                        <fieldset>
+                            <legend>
+                                <label title="是否启用行拖拽功能">
+                                    <input id="drag" type="checkbox" checked="checked" />启用行拖拽
+                                </label>
+                            </legend>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th style="width: 33%;"></th>
+                                        <th style="width: 33%;"></th>
+                                        <th style="width: 33%;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <span>模式：</span>
+                                            <label title="表示在只能对一行进行拖拽操作">
+                                                <input id="dragSingle" type="radio" name="dragModel" checked="checked" />单行拖拽
+                                            </label>
+                                            <label title="表示允许拖拽多个勾选行">
+                                                <input id="dragMultiple" type="radio" name="dragModel" />多行拖拽
+                                            </label>
+                                        </td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <label title="将拖拽按钮生成到第几列，不填写为生成到第一列">
+                                                拖拽列位置<input id="dragIndex" type="number" value="" min="0" />
+                                            </label>
+                                        </td>
+                                        <td>
+                                            <label title="设定拖拽列的宽度，不设定为默认宽度">
+                                                拖拽列宽度<input id="dragWidth" type="text" value="" />
+                                            </label>
+                                        </td>
+                                        <td>
+                                            <label title="可重定义触发拖拽操作的元素选择器，例若设定为tr则点击行任何位置都触发开始拖拽。注意此设定为tbody下的事件代理选择器，您需要从tbody下书写触发拖拽操作的元素选择器">
+                                                触发拖拽选择器<input id="delegateSelector" type="text" value="" style="width: 115px;"/>
+                                            </label>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>事件</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <pre class="preFn" style="display: none;" contenteditable="true">
+function (srcRowArr, $dragPop) {
+    console.log("onBeforeDrag",this,arguments);
+}
+</pre>
+                                            <label title="当鼠标点击并准备拖拽时发生，可返回false阻止拖拽">
+                                                <input id="onBeforeDrag" type="checkbox" />当拖拽前触发
+                                            </label>
+                                            <a class="linkShowFn disabled">Fn</a>
+                                        </td>
+                                        <td>
+                                            <pre class="preFn" style="display: none;" contenteditable="true">
+function(e, pagePoint, tableRect, dragDownPoint){
+    console.log("onDrag",this,arguments);
+}
+</pre>
+                                            <label title="当鼠标点击并未释放时（拖着行移动时）发生，可返回false阻止内部默认的实时显示浮动层位置操作，也可返回坐标对象{x:*,y:*}直接代替浮动层位置。可直接修改参数对象实现修改浮动层位置">
+                                                <input id="onDrag" type="checkbox" />当拖拽中触发
+                                            </label>
+                                            <a class="linkShowFn disabled">Fn</a>
+                                        </td>
+                                        <td>
+                                            <pre class="preFn" style="display: none;" contenteditable="true">
+function(errorCode, errorMsg){
+    console.log("onDragError",this,arguments);
+}
+</pre>
+                                            <label title="当拖拽操作失败时发生，参数分别为错误码和错误信息">
+                                                <input id="onDragError" type="checkbox" />当拖拽失败时触发
+                                            </label>
+                                            <a class="linkShowFn disabled">Fn</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <pre class="preFn" style="display: none;" contenteditable="true">
+function(dstRow, srcRowArr, range){
+    console.log("onBeforeDrop",this,arguments);
+}
+</pre>
+                                            <label title="当鼠标释放，拖放操作完成前发生，可返回false阻止默认的行移动操作">
+                                                <input id="onBeforeDrop" type="checkbox" />当释放前触发
+                                            </label>
+                                            <a class="linkShowFn disabled">Fn</a>
+                                        </td>
+                                        <td>
+                                            <pre class="preFn" style="display: none;" contenteditable="true">
+function(dstRow, srcRowArr, range){
+    console.log("onDrop",this,arguments);
+}
+</pre>
+                                            <label title="当鼠标释放，拖拽操作完成且行移动成功后发生">
+                                                <input id="onDrop" type="checkbox" />当释放后触发
+                                            </label>
+                                            <a class="linkShowFn disabled">Fn</a>
+                                        </td>
+                                        <td>
+                                            <pre class="preFn" style="display: none;" contenteditable="true">
+function(isSuccess,$dragPop){
+    console.log("onDragComplete",this,arguments);
+}
+</pre>
+                                            <label title="当拖拽操作完成，浮动层隐藏后发生（无论拖拽操作是否成功都会触发）">
+                                                <input id="onDragComplete" type="checkbox" />当拖拽完成时触发
+                                            </label>
+                                            <a class="linkShowFn disabled">Fn</a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </fieldset>
+
+                        <br />
+                        <fieldset>
+                            <legend>工具栏</legend>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th style="width: 33%;"></th>
+                                        <th style="width: 33%;"></th>
+                                        <th style="width: 33%;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td colspan="3">从下方 <strong>表格字段</strong> 新增列类型为 <strong>工具栏</strong> 即可
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <label>
+                                                工具栏位置
+                                                <select disabled="disabled">
+                                                    <option value="rightTop">右上角</option>
+                                                    <option value="LeftTop">左上角</option>
+                                                </select>
+                                            </label>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </fieldset>
+                        <br />
+                        <fieldset class="fidHeaders">
+                            <legend>设置表格字段</legend>
+                            <div style="margin-top: 5px;">
+                                <label>
+                                    <input type="checkbox" onchange="$(':checkbox.chkRowHeader').prop('checked',this.checked).trigger('change')" />全选</label>
+                                <span>设定表格所有列信息</span>
+                                *
+                                <input class="btnAdd" type="button" value="✚添加" />
+                                <input class="btnRemove" type="button" value="✖移除" />
+                                <input class="btnUp" type="button" value="▲上移" />
+                                <input class="btnDown" type="button" value="▼下移" />
+                            </div>
+                            <div class="headerTableList">
+                                <table class="headerTable template" style="display: none;">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 6%;"></th>
+                                            <th style="width: 30%;"></th>
+                                            <th style="width: 30%;"></th>
+                                            <th style="width: 30%;"></th>
+                                            <th style="width: 4%;"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td rowspan="5" style="background-color: rgb(240,240,240); text-align: center;">
+                                                <label class="labelRowHeader">
+                                                    <input class="chkRowHeader" type="checkbox" />
+                                                    <strong>0</strong>
+                                                </label>
+                                            </td>
+                                            <td>
+                                                <label>
+                                                    列类型<select header="cellType">
+                                                        <option value="jCell">普通单元格</option>
+                                                        <option value="jCellRadio">单选钮单元格</option>
+                                                        <option value="jCellIcon">图片单元格</option>
+                                                        <option value="jCellCheckBox">复选框单元格</option>
+                                                        <option value="jCellButton">按钮单元格</option>
+                                                        <option value="jCellIconText">图片文字单元格</option>
+                                                        <option value="jCellField">双行字段单元格</option>
+                                                        <option value="jCellSingleField">单行字段单元格</option>
+                                                        <option value="jCellComplexTitle">复合型单元格-主要字段</option>
+                                                        <option value="jCellComplexField">复合型单元格-次要字段</option>
+                                                        <option value="jCellToolBar">工具栏</option>
+                                                    </select>
+                                                </label>
+                                            </td>
+                                            <td>
+                                                <label title="长单元格跨越了几个小单元格">
+                                                    <span celltype="jCellComplexTitle" style="display: none;">跨越列数<input header="colspan" type="number" value="3" min="1" /></span>
+                                                </label>
+                                                <label title="固定显示的图片URL地址，若URL地址不固定则可以使用普通图片单元格">
+                                                    <span celltype="jCellIconText" style="display: none;">图标URL<input header="icon" type="text" value="images/Button_Enabled.png" /></span>
+                                                </label>
+                                                <label title="在工具栏中显示的按钮图片大小">
+                                                    <span celltype="jCellToolBar" style="display: none;">图标URL<input header="icon" type="text" value="images/InvAPar_16.png" /></span>
+                                                </label>
+                                            </td>
+                                            <td></td>
+                                            <td rowspan="5">
+                                                <a class="addCellType charBtn" style="">◀</a>
+                                                <a class="removeCellType charBtn" style="">▶</a>
+                                                <a class="btnAppend charBtn" style="">✚</a>
+                                                <a class="btnDel charBtn" style="">✖</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <label title="从服务器数据中每一行读取指定数据对应的字段名">
+                                                    列字段<input header="field" type="text" />
+                                                </label>
+                                            </td>
+                                            <td>
+                                                <label title="用于在表格的列头显示当前列的说明文字，支持HTML字符串">
+                                                    列的说明<input header="text" type="text" />
+                                                </label>
+                                            </td>
+                                            <td>
+                                                <label title="当前列的宽度，不填写为自动宽度。支持百分比，若不填写单位默认为px">
+                                                    列的宽度<input header="width" type="text" />
+                                                </label>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <label title="列的名称，也是此列单元格在一行中唯一的名称，可通过jRow行的getCell(名称)获取此单元格">
+                                                    列名称<input header="name" type="text" />
+                                                </label>
+                                            </td>
+                                            <td>
+                                            </td>
+                                            <td>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <pre class="preFn" style="display: none;" contenteditable="true">
+function(c,r){
+    console.log("cellCb",this,arguments);
+}
+</pre>
+                                                <label title="在此列所有单元格初始化后触发。用户可重定义单元格内容，若返回jquery对象则将替换单元格原始内容">
+                                                    <input header="cellCb" type="checkbox" />单元格回调函数
+                                                </label>
+                                                <a class="linkShowFn disabled">Fn</a>
+                                            </td>
+                                            <td>
+                                                <pre class="preFn" style="display: none;" contenteditable="true">
+function(c,r){
+    console.log("cellHeaderCb",this,arguments);
+}
+</pre>
+                                                <label title="在初始化此列列头单元格后触发。用户可重定义列头单元格内容，若返回jquery对象则将替换列头单元格原始内容">
+                                                    <input header="cellHeaderCb" type="checkbox" />列头单元格回调函数
+                                                </label>
+                                                <a class="linkShowFn disabled">Fn</a>
+                                            </td>
+                                            <td>
+                                                <label title="可设定当数据无法转换为字符串时显示的默认值。注意此选项仅在开启了[显示单元格默认值]后生效，同时此选项也会覆盖全局设定中的[单元格默认值]设定">
+                                                    <input header="defaultValue" type="checkbox" />默认值
+                                                </label>
+                                                <input header="defaultValue" type="text" disabled="disabled" />
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <label title="修改传递给单元格内部的数据源的值，在[单元格回调函数]前触发。用于修改直接数据源，这通常比单元格初始化完成后再用单元格回调函数修改要方便的多">
+                                                    <input type="checkbox" header="value" />列数据源修改
+                                                </label>
+                                            </td>
+                                            <td>
+                                                <label title="将单元格数据源修改为默认值。如整列都显示相同的图片，再如整列都显示相同文字的按钮">
+                                                    <input type="radio" name="radioGroup_value" checked="checked" disabled="disabled" />固定值
+                                                </label>
+                                                <input type="text" header="value" disabled="disabled" />
+                                            </td>
+                                            <td>
+                                                <pre class="preFn" style="display: none;" contenteditable="true">
+function(c,r){
+    console.log("value",this,arguments);
+}
+</pre>
+                                                <label title="将数据源替换为回调函数中返回的内容">
+                                                    <input type="radio" header="value" name="radioGroup_value" disabled="disabled" />回调函数
+                                                </label>
+                                                <a class="linkShowFn disabled">Fn</a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr></tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </fieldset>
+                        <br />
+                        <br />
+                    </form>
+                </div>
+                <div class="tabPage">settingsssss</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
