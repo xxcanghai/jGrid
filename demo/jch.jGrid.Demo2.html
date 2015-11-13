@@ -1,0 +1,769 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>jch.jGrid.Demo</title>
+
+    <script src="lib/jquery-1.9.1.js"></script>
+    <link  href="lib/bootstrap3.0/css/bootstrap.css" rel="stylesheet" />
+    <script src="lib/Core/jch.Core.js"></script>
+    <link  href="lib/jCheckBox/jch.jCheckBox.css" rel="stylesheet" />
+    <script src="lib/jCheckBox/jch.jCheckBox.js"></script>
+    <script src="lib/staticPage/jch.staticPage-1.0.js"></script>
+    <link  href="lib/tabControl/jch.tabControl.css" rel="stylesheet" />
+    <script src="lib/tabControl/jch.tabControl.js"></script>
+    <script src="../jch.jGrid.js"></script>
+    <link href="../jch.jGrid.css" rel="stylesheet" />
+    <style>
+        body, html { font-family: "微软雅黑"; height: 100%; background-color: rgb(60, 72, 87); }
+        a { cursor: pointer; }
+        h1 { color: white; margin: 0; padding: 10px; }
+        .hide { display: none; }
+        /*TabControls*/
+        .tabControl { bottom: 0; position: absolute; top: 60px; width: 100%; }
+        .tabControl .tabTitleList { border-bottom: 1px solid rgb(240, 240, 240); }
+        .tabControl .tabTitleList a:hover { color: rgb(0, 149, 217); }
+        .tabControl .tabPageList { border: 2px groove threedface; bottom: 0; position: absolute; top: 38px; width: 100%; background-color: white; }
+        .tabControl .tabPage { height: 100%; }
+        .tabControl .tabPage .slider { width: 250px; background-color: rgb(241, 241, 241); position: absolute; top: 40px; bottom: 0; right: 0; padding: 10px; border-left: 1px solid #ccc; }
+        .tabControl .tabPage .jgrid { margin-left: 250px; padding: 10px; height: 100%; }
+        .tabControl .tabPage .jgridBox { width: 100%; margin-left: -250px; float: left; bottom: 0; overflow: auto; position: absolute; top: 40px; }
+        .toolBar { background: rgb(241, 241, 241); border-bottom: 1px solid #ccc; height: 40px; line-height: 40px; padding: 0 10px; position: relative; }
+        /*DemoList*/
+        #demoList { }
+        #demoList .demoItem { border: 1px solid #d8d8d8; float: left; height: 200px; margin: 10px; opacity: 1; position: relative; width: 300px; cursor: pointer; }
+        #demoList .demoItem:hover { border-color: #9A9FA4; box-shadow: 0 0 6px 0 rgb(0, 0, 0); }
+        #demoList .demoItem .title { background: #fafafa none repeat scroll 0 0; bottom: 0; display: block; height: 25px; line-height: 25px; overflow: hidden; position: absolute; text-indent: 3px; text-overflow: ellipsis; white-space: nowrap; width: 100%;  }
+        #demoList .demoItem:hover .title { display: block; }
+        #demoList .demoItem .cover { width: 100%; height: 100%; display: block; background-repeat: no-repeat; background-position: center; }
+    </style>
+    <style>
+        #dm_baidupan { font-family: "宋体"; font-size: 12px; }
+        #dm_baidupan .jGrid a { color: black; }
+        #dm_baidupan .checkallLabel { display: none; }
+        #dm_baidupan .jGrid tbody tr { height: 38px; }
+        #dm_baidupan .jGrid tbody tr:hover { background-color: rgb(240, 248, 253); }
+        #dm_baidupan .jGrid tbody tr.hover { background-color: rgb(240, 248, 253); }
+        #dm_baidupan .jGrid thead tr { height: 42px; background-color: rgb(247, 247, 247); border-radius: 2px; border: 1px solid #D2D2D2; color: #888; }
+        #dm_baidupan .jGrid thead th { border-right: 1px solid #E5E5E5; }
+        #dm_baidupan .jGrid thead th:hover { background-color: rgb(232, 245, 253); cursor: pointer; }
+        #dm_baidupan .jGrid thead th:first-child { border-right: none; }
+        #dm_baidupan .jGrid thead th:nth-child(1) { border-right: none; }
+        #dm_baidupan .jGrid thead th:nth-child(3) { border-right: none; }
+        #dm_baidupan td[celltype='jCellIconText'] .jCell { margin-left: 10px; }
+        #dm_baidupan .jGrid th { font-weight: normal; }
+        #dm_baidupan .jCheckBox { background-image: url("images/baidupan/btn_icon.gif"); width: 14px; height: 14px; }
+        #dm_baidupan .jCheckBox[jchecked="false"] { background-position: -113px 0; }
+        #dm_baidupan .jCheckBox:hover { border-radius: 0; }
+        #dm_baidupan .jCheckBox[jchecked="true"] { background-position: -113px -19px; }
+        #dm_baidupan .lsticon { background: transparent url("images/baidupan/sprite_list_icon.gif") no-repeat scroll -421px -83px; width: 16px; height: 16px; }
+        #dm_baidupan .lsticon.t0 { background-position: -5px -3px; }
+        #dm_baidupan .lsticon.t1 { background-position: -357px -83px; }
+        #dm_baidupan .lsticon.t2 { background-position: -5px -83px; }
+        #dm_baidupan .lsticon.t3 { background-position: -229px -83px; }
+        #dm_baidupan .btnicon { height: 20px; width: 20px; background: transparent url("images/baidupan/btn_icon.gif") repeat scroll 0% 0%; display: inline-block; }
+        #dm_baidupan .btnicon.share { background-position: -208px -230px; }
+        #dm_baidupan .btnicon.share:hover { background-position: -182px -59px; }
+        #dm_baidupan .btnicon.down { background-position: -207px -210px; }
+        #dm_baidupan .btnicon.down:hover { background-position: -181px -39px; }
+        #dm_baidupan .btnicon.more { background-position: -208px -351px; }
+        #dm_baidupan .btnicon.more:hover { background-position: -182px -308px; }
+        #dm_baidupan .btns { float: right; height: 36px; line-height: 36px; cursor: pointer; visibility: hidden; }
+        #dm_baidupan .link { float: left; height: 36px; line-height: 36px; }
+        #dm_baidupan .jGrid tbody tr:hover .btns { visibility: visible; }
+        #dm_baidupan .jGrid [rowtype="jRowToolBar"] { height: 41px; left: 30px; line-height: 41px; position: absolute; top: 1px; padding-left: 100px; display: none; background-color: rgb(242, 246, 255); }
+        #dm_baidupan [rowtype=jRowToolBar] td { background: url("images/baidupan/btn_sprit.gif") no-repeat scroll 0 -144px; color: #333; display: inline-block; font-size: 12px; height: 28px; line-height: 28px; margin-right: 6px; outline: 0 none; padding-left: 35px; position: relative; vertical-align: middle; padding-right: 0; }
+        #dm_baidupan [rowtype=jRowToolBar] td .jCell { background: #f2f6ff url("images/baidupan/btn_sprit.gif") right -144px; color: #666; display: block; padding-right: 10px; }
+        #dm_baidupan [rowtype=jRowToolBar] td a { background: url("images/baidupan/btn_icon.gif"); display: block; height: 20px; left: 10px; position: absolute; top: 5px; width: 20px; }
+        #dm_baidupan [rowtype=jRowToolBar] td:hover { background-position: 0 -180px; }
+        #dm_baidupan [rowtype=jRowToolBar] td:hover .jCell { background-position: right -180px; }
+        #dm_baidupan [rowtype=jRowToolBar] td a.share { background-position: -158px -60px; }
+        #dm_baidupan [rowtype=jRowToolBar] td:hover a.share { background-position: -180px -60px; }
+        #dm_baidupan [rowtype=jRowToolBar] td a.down { background-position: -159px -39px; }
+        #dm_baidupan [rowtype=jRowToolBar] td:hover a.down { background-position: -182px -39px; }
+        #dm_baidupan [rowtype=jRowToolBar] td a.del { background-position: -156px -130px; }
+        #dm_baidupan [rowtype=jRowToolBar] td:hover a.del { background-position: -179px -130px; }
+        #dm_baidupan .dragPop thead tr { height: 0; border: none; }
+        #dm_baidupan .dragPop tbody tr { background-color: rgb(209,232,255); }
+        #dm_baidupan .dragPop tbody tr:hover { background-color: rgb(209,232,255); cursor: inherit; }
+    </style>
+    <script>
+        //jch.Core.addEvent(window, "error", function (e) { jch.jDebugger.showErrorInfo(e); });
+    </script>
+    <script>
+        $(function () {
+            "use strict";
+            window.jch.tabControl();
+            stateFunctionTime(dm_jGrid);
+            stateFunctionTime(dm_baidupan);
+            $("#demoList").delegate(".demoItem", "click", demoItemClick);
+            //tabGotoPage(2);
+
+
+            //跳转到显示某个tab页面
+            function tabGotoPage(index) {
+                window.jch.staticPage[$(".tabControl").attr("tabcontrolname")].naviPage(null, index);
+            };
+
+            //统计某函数运行时间
+            function stateFunctionTime(fn) {
+                var fnName = jch.Core.getFunctionName(fn) || "fn_" + jch.Core.getRandomStr(8);
+                console.time(fnName);
+                fn();
+                console.timeEnd(fnName);
+            }
+
+            function repeat(arr, count) {
+                if (count == undefined) return arr;
+                var dst = $.extend(true, [], arr);
+                for (var i = 0; i < count; i++) {
+                    dst = dst.concat(arr);
+                }
+                return dst;
+            };
+
+            function demoItemClick(e) {
+                var index = $(this).index() + 1;
+                tabGotoPage(index);
+            }
+
+            function getFileSize(fileLength) {
+                if (fileLength < Math.pow(1024, 1)) {
+                    return Math.round((fileLength / Math.pow(1024, 0)), 0) + "字节";
+                } else if (fileLength < Math.pow(1024, 2)) {
+                    return Math.round((fileLength / Math.pow(1024, 1)), 0) + "KB";
+                } else if (fileLength < Math.pow(1024, 3)) {
+                    return Math.round((fileLength / Math.pow(1024, 2)), 0) + "MB";
+                } else if (fileLength < Math.pow(1024, 4)) {
+                    return Math.round((fileLength / Math.pow(1024, 3)), 0) + "GB";
+                } else if (fileLength < Math.pow(1024, 5)) {
+                    return Math.round((fileLength / Math.pow(1024, 4)), 0) + "TB";
+                }
+                return Math.round((fileLength / Math.pow(1024, 5)), 0) + "PB";
+            };
+
+            function dm_jGrid() {
+                var jch = window.jch;
+                var myCheckall = window.jch.jCheckBox();
+                var myCheckallSubArr = [];
+                var serverDataObject = {
+                    Data: [{
+                        QaTitle: "新的医保可以报销么？0",
+                        SubmitTime: 1427614397257,
+                        AnsTime: 1427614597784,
+                        AnsName: "张老师",
+                        IsAns: true,
+                        Other: {
+                            OtherData1: 2,
+                            OtherData2: 3
+                        }
+                    }, {
+                        QaTitle: "肚子痛是怎么回事我小肚子经常会突然痛？1",
+                        SubmitTime: 1427614597784,
+                        AnsTime: 0,
+                        AnsName: "",
+                        IsAns: false,
+                        Other: {
+                            OtherData1: 2,
+                            OtherData2: 3
+                        }
+                    }, {
+                        QaTitle: "新上线药品治疗早期肿瘤有效果吗？2",
+                        SubmitTime: 1427614397257,
+                        AnsTime: 1427614597784,
+                        AnsName: "刘主任",
+                        IsAns: true,
+                        Other: {
+                            OtherData1: 2,
+                            OtherData2: 3
+                        }
+                    }, {
+                        QaTitle: "肚子痛是怎么回事我小肚子经常会突然痛3？",
+                        SubmitTime: 1427614597784,
+                        AnsTime: 0,
+                        AnsName: "",
+                        IsAns: false,
+                        Other: {
+                            OtherData1: 2,
+                            OtherData2: 3
+                        }
+                    }, {
+                        QaTitle: "肚子痛是怎么回事我小肚子经常会突然痛4？",
+                        SubmitTime: 1427614597784,
+                        AnsTime: 1427614597784,
+                        AnsName: "大老李",
+                        IsAns: false,
+                        Other: {
+                            OtherData1: 2,
+                            OtherData2: 3
+                        }
+                    }],
+                    TotalCountNum: 5
+                };
+                var config = {
+                    headers: [
+                    {
+                        width: "10%",
+                        field: "IsAns",
+                        name: "testEdit",
+                        cellCb: function (c, r) {
+                            var _this = this;
+                            _this.element.find("span").text(c + "双击编辑");
+                            _this.element.dblclick(function (e) {
+                                _this.edit(true, {
+                                    callback: function (result, text, $eidtBox) {
+                                        if (result == true) {
+                                            if (text.length == 0) {
+                                                alert("请填入要更新的值");
+                                                return false; //返回false阻止关闭，用户异步弹出提示框
+                                            } else {
+                                                //alert("请手动更新数据为:" + text);
+                                            }
+                                        }
+                                    }
+                                    //width:"100px"//可固定宽度，默认不传为100%宽
+                                });
+                            });
+                        }
+                    },
+                    {
+                        width: "50px",
+                        value: function (c, r) {
+                            return "第" + this.row.jgrid.getRows(jch.jGrid.jRow).length + "条";
+                        }
+                    }, {
+                        text: "头像",
+                        width: "60px",
+                        field: "UserHeaderURL",
+                        cellType: jch.jGrid.jCellAvatar,
+                        value: "images/Header40.png",
+                        gender: function (c, r) {
+                            return Math.floor(Math.random() * 10) % 2 == 0 ? 1 : 2;
+                        }
+                    }, {
+                        text: "图片",
+                        width: "90px",
+                        cellType: jch.jGrid.jCellIcon,
+                        value: "images/icon.png"
+                    }, {
+                        field: "QaTitle",
+                        text: "提问/复合型 标题单元格",
+                        cellType: jch.jGrid.jCellComplexTitle,
+                        colspan: 2
+                    }, {
+                        field: "SubmitTime",
+                        text: "提交时间",
+                        width: "40%",
+                        cellType: jch.jGrid.jCellComplexField,
+                        value: function (cdata) { return cdata == 0 ? "-" : new Date(parseInt(cdata)).toLocaleString(); }
+                    }, {
+                        field: "AnsTime",
+                        text: "解答时间",
+                        width: "60%",
+                        cellType: jch.jGrid.jCellComplexField,
+                        value: function (cdata) { return cdata == 0 ? "-" : new Date(parseInt(cdata)).toLocaleString(); }
+                    }, {
+                        text: "单选钮",
+                        width: "30px",
+                        field: "IsAns",
+                        cellType: jch.jGrid.jCellRadio,
+                        cellCb: function (c, r, jcb) {
+                            jcb.enabled(false);
+                        }
+                    }, {
+                        field: "IsAns",
+                        text: "双行字段",
+                        width: "80px",
+                        cellType: jch.jGrid.jCellField
+                        //value: "数值"
+                    }, {
+                        field: "IsAns",
+                        text: "复选框",
+                        width: "100px",
+                        cellType: jch.jGrid.jCellCheckBox,
+                        cellHeaderCb: function () {
+                            this.element.prepend(myCheckall.element).css("margin-left", "8px");
+                        },
+                        cellCb: function (c, r, jcb) {
+                            //jcb.enabled(false);
+                            myCheckallSubArr.push(jcb);
+                        }
+                    }, {
+                        field: "IsAns",
+                        text: "图标+文字",
+                        cellType: jch.jGrid.jCellIconText,
+                        width: "150px",
+                        value: function (c) {
+                            return c ? "已解答" : "未解答";
+                        },
+                        icon: function (c, r) {
+                            //console.log(this, arguments)
+                            return this.orgCellData ? "images/Button_Enabled.png" : "images/Button_Disabled_Yellow.png";
+                        },
+                        cellCb: function (c, r, text, icon) {
+                            text.css("color", this.orgCellData ? "rgb(0,149,217)" : "rgb(241,196,18)");
+                        },
+                        sortModel: jch.jGrid.sortModelEnum.single
+                    }, {
+                        width: "80px",
+                        text: "",//按钮
+                        cellType: jch.jGrid.jCellButton,
+                        value: "上移",
+                        cellCb: function (cdata, rdata, btn) {
+                            var cell = this;
+                            btn.click(function () {
+                                cell.row.moveUp();
+                            });
+                        }
+                    }, {
+                        width: "80px",
+                        text: "",//按钮
+                        cellType: jch.jGrid.jCellButton,
+                        value: "下移",
+                        cellCb: function (cdata, rdata, btn) {
+                            //console.log(this, arguments);
+                            var cell = this;
+                            btn.click(function () {
+                                cell.row.moveDown();
+                            });
+                        }
+                    }],
+                    toolbars: [
+                        {
+                            cellType: jch.jGrid.jCellToolBar,
+                            width: "70px",
+                            icon: "images/InvAPar_16.png",
+                            value: "编辑",
+                            cellCb: function (c, r, toolItem) {
+                                var _this = this;
+                                toolItem.click(function () {
+                                    alert("工具栏 " + _this.cellData);
+                                });
+                            }
+                        },
+                        {
+                            cellType: jch.jGrid.jCellToolBar,
+                            icon: "images/InvAPar_16.png",
+                            value: "删除",
+                            cellCb: function (c, r, toolItem) {
+                                var _this = this;
+                                toolItem.click(function () {
+                                    alert("工具栏 " + _this.cellData);
+                                });
+                            }
+                        }
+                    ],
+                    checkable: {
+                        model: jch.jGrid.checkableModelEnum.multiple,
+                        checkbox: {
+                            checked: function (cdata, rdata, cell) {
+                                //return cell.row.getIndex() == 0;
+                            },
+                            enabled: function (cdata, rdata, cell) {
+                                //console.log("enabled",arguments);
+                                //return cell.row.getIndex() > 1;
+                                return true;
+                            },
+                            onBeforeCheckedChange: function (ischk) {
+                                console.log("onBeforeCheckedChange", this, arguments);
+                                //console.log(ischk, i, cdata, rdata);
+                            }
+                        },
+                        checkall: {
+                            checked: function () {
+                                //console.log("checkall-checked", this, arguments);
+                                return false;
+                            },
+                            enabled: true
+                        }
+                    },
+                    pager: {
+                        onBeforePageChange: function (dstIndex, curIndex) {
+                            myCheckallSubArr.length = 0;
+                            //console.log("翻页后页码：", dstIndex);
+                            //console.log("翻页前页码：", curIndex);
+                            //return false;
+                        },
+                        onPageChanged: function (currIndex) {
+                            console.log(myCheckallSubArr)
+                            myCheckall.initCheckAllMode(myCheckallSubArr);
+                        },
+                        pageSize: 5,
+                        navPageSize: 5
+                    },
+                    expand: {
+                        model: jch.jGrid.expandModelEnum.single,
+                        onBeforeExpand: function (r) {
+                            console.log("onBeforeExpand", this, arguments);
+                            //return false;//可阻止展开
+                        },
+                        onExpand: function (r, cell) {
+                            console.log("onExpand", this, arguments);
+                            cell.element.append($("<b>").html("onExpand: " + r.QaTitle));
+                        },
+                        onBeforeCollapse: function (r, cell) {
+                            console.log("onBeforeCollapse", this, arguments);
+                            //return false;//可阻止关闭
+                        },
+                        onCollapse: function (r) {
+                            console.log("onCollapse", this, arguments);
+                        }
+                    },
+                    config: {
+                        isShowColHeaderText: true,//是否显示列头文字
+                        isShowColHeader: true,//是否显示列头行
+                        isStaticPage: true//true前端分页，false后台分页
+                    },
+                    drag: {
+                        model: jch.jGrid.dragModelEnum.multiple,
+                        //index: 0,
+                        width: "11px"
+                    },
+                    sort: {
+                        //model:jch.jGrid.sortModelEnum.all
+                    }
+                };
+
+                var jgrid = window.jch.jGrid(config);
+                $("#dm_jGrid").append(jgrid.element);
+                var myDataArr = repeat(serverDataObject.Data, 1);
+                jgrid.setData(myDataArr, 1, myDataArr.length);
+                myCheckall.initCheckAllMode(myCheckallSubArr);
+            }
+
+            function dm_baidupan() {
+                var data = [{
+                    "Name": "软件包",
+                    "Length": null,
+                    "Time": 1427611597784,
+                    "Type": 0
+                }, {
+                    "Name": "2015工作文档",
+                    "Length": null,
+                    "Time": 1427614507784,
+                    "Type": 0
+                }, {
+                    "Name": "安装文件",
+                    "Length": null,
+                    "Time": 1427614507784,
+                    "Type": 0
+                }, {
+                    "Name": "FastCopy.rar",
+                    "Length": 123456,
+                    "Time": 1427214597784,
+                    "Type": 1
+                }, {
+                    "Name": "Adobe.rar",
+                    "Length": 12456,
+                    "Time": 1427214597784,
+                    "Type": 1
+                }, {
+                    "Name": "adele.png",
+                    "Length": 22456,
+                    "Time": 1427214597784,
+                    "Type": 2
+                }, {
+                    "Name": "压缩包.rar",
+                    "Length": 8823456,
+                    "Time": 1427614597784,
+                    "Type": 1
+                }, {
+                    "Name": "图片1.jpg",
+                    "Length": 1256,
+                    "Time": 1426614597784,
+                    "Type": 2
+                }, {
+                    "Name": "电影海上钢琴师720P.avi",
+                    "Length": 1998878256,
+                    "Time": 1407614227784,
+                    "Type": 3
+                }];
+                var config = {
+                    headers: [{
+                        cellType: jch.jGrid.jCell,
+                        text: "",
+                        width: "30px",
+                        field: "Type",
+                        name: "Type",
+                        cellCb: function (c, r) {
+                            this.getCore().remove();
+                            return $("<div>").addClass("lsticon").addClass("t" + c);
+                        },
+                        cellHeaderCb: function (c, r) {
+                        }
+                    }, {
+                        cellType: jch.jGrid.jCell,
+                        text: "文件名",
+                        width: "",
+                        field: "Name",
+                        name: "Name",
+                        sortModel: jch.jGrid.sortModelEnum.single,
+                        sortbyModel: jch.jGrid.sortbyModelEnum.string,
+                        cellCb: function (c, r) {
+                            var $e = this.getCore();
+                            $e.wrap($("<a class='link' href='#'>"));
+                            this.element.append(
+                                $("<div class='btns'>").append(
+                                    $("<span class='btnicon share'>")
+                                ).append(
+                                    $("<span class='btnicon down'>")
+                                ).append(
+                                    $("<span class='btnicon more'>")
+                                )
+                            );
+                        }
+                    }, {
+                        cellType: jch.jGrid.jCell,
+                        text: "大小",
+                        width: "",
+                        field: "Length",
+                        name: "Length",
+                        sortModel: jch.jGrid.sortModelEnum.single,
+                        sortbyModel: jch.jGrid.sortbyModelEnum.number,
+                        value: function (c, r) {
+                            if (c != null) return getFileSize(c);
+                        }
+                    }, {
+                        cellType: jch.jGrid.jCell,
+                        text: "修改日期",
+                        width: "",
+                        field: "Time",
+                        sortModel: jch.jGrid.sortModelEnum.single,
+                        sortbyModel: jch.jGrid.sortbyModelEnum.time,
+                        value: function (c, r) {
+                            return new Date(c).toLocaleString();
+                        }
+                    }],
+                    toolbars: [{
+                        cellType: jch.jGrid.jCell,
+                        text: "",
+                        width: "",
+                        field: "",
+                        value: "分享",
+                        cellCb: function () {
+                            this.getCore().before($("<a>").addClass("share"));
+                        }
+                    }, {
+                        cellType: jch.jGrid.jCell,
+                        text: "",
+                        width: "",
+                        field: "",
+                        value: "下载",
+                        cellCb: function () {
+                            this.getCore().before($("<a>").addClass("down"));
+                        }
+                    }, {
+                        cellType: jch.jGrid.jCell,
+                        text: "",
+                        width: "",
+                        field: "",
+                        value: "删除",
+                        cellCb: function () {
+                            this.getCore().before($("<a>").addClass("del"));
+                        }
+                    }, {
+                        cellType: jch.jGrid.jCell,
+                        text: "",
+                        width: "",
+                        field: "",
+                        value: "推送到云设备",
+                        cellCb: function () {
+                            this.getCore().before($("<a>").addClass("del"));
+                        }
+                    }, {
+                        cellType: jch.jGrid.jCell,
+                        text: "",
+                        width: "",
+                        field: "",
+                        value: "更多",
+                        cellCb: function () {
+                            this.getCore().before($("<a>").addClass("del"));
+                        }
+                    }],
+                    config: {
+                        isShowColHeader: true,
+                        isShowColHeaderText: true,
+                        isShowFooter: true,
+                        isStaticPage: false,
+                        isShowDefaultValue: true,
+                        defaultValue: "-"
+                    },
+                    checkable: {
+                        checkbox: {
+                            checked: false,
+                            enabled: true,
+                            onCheckedChange: function (chkState, e, cdata, rdata, cell) {
+                                var $tr = cell.row.element;
+                                if (chkState) {
+                                    $tr.addClass("hover");
+                                } else {
+                                    $tr.removeClass("hover");
+                                }
+                                var $tool = $("#dm_baidupan").find("[rowtype='jRowToolBar']");
+                                if (jgrid.getCheckedRow().length > 0) {
+                                    $tool.show();
+                                } else {
+                                    $tool.hide();
+                                }
+                            }
+                        },
+                        checkall: {
+                            checked: false,
+                            enabled: true
+                        },
+                        model: window.jch.jGrid.checkableModelEnum.multiple
+                    },
+                    drag: {
+                        model: jch.jGrid.dragModelEnum.multiple,
+                        //index: 2,
+                        width: "11px",
+                        onBeforeDrag: function (srcRowArr, $dragPop) {
+                            //console.log(this, srcRowArr, $dragPop);
+                            //return false;
+                        },
+                        onDrag: function (pagePoint, tableRect, dragDownPoint) {
+                            //1、pagePoint.x = 10;//修改鼠标坐标相对于整个页面的x值，从而影响浮动层位置
+                            //2、return { x: 10, y: 10 };//修改浮动层固定显示在指定坐标
+                            //3、return { x: tableRect.x };//只修改浮动层x坐标为固定值，表现为行只能纵向拖拽而不能横向拖拽
+                            //4、return false;//禁止浮动层移动
+                        },
+                        onBeforeDrop: function (dstRow, srcRowArr, range) {
+                            //return false;//返回false阻止行移动
+                        },
+                        onDrop: function (dstRow, srcRowArr, range) {
+                            //console.log("onDrop",arguments);
+                        },
+                        onDragError: function (errorCode, errorMsg) {
+                            console.log("onDragError", this, arguments)
+                        },
+                        onDragComplete: function ($dragPop) {
+                            console.log("onDragComplete", this, arguments);
+                        }
+                    },
+                    expand: {
+                        model: jch.jGrid.expandModelEnum.multiple,
+                        onExpand: function (rdata, expCell) {
+                            expCell.element.append(rdata.Name);
+                            var $expBtn = this.getCell("expand").element.data("jCellExpandButton");
+                            $expBtn.removeClass("collapse").addClass("expand");
+                        },
+                        onBeforeCollapse: function () {
+                            //return false;
+                        },
+                        onCollapse: function (rdata) {
+                            var $expBtn = this.getCell("expand").element.data("jCellExpandButton");
+                            $expBtn.removeClass("expand").addClass("collapse");
+                        }
+                    }
+                };
+
+                $("#dm_baidupan").delegate("tbody td[celltype='jCell']", "click", function (e) {
+                    e = e || window.event;
+                    var $tr = $(this).closest("tr");
+                    //var $target = $(e.target || e.srcElement);
+                    var jcb = $($tr).data("jRow").getCell("checkbox").element.data("jCheckBox");
+                    jcb.change();
+
+                });
+                var jgrid = window.jch.jGrid(config);
+                $("#dm_baidupan").append(jgrid.element);
+                var myDataArr = repeat(data, 3);
+                jgrid.setData(myDataArr, 1, myDataArr.length);
+            }
+        })
+    </script>
+</head>
+<body>
+    <div id="header">
+        <h1>jGrid案例一览</h1>
+    </div>
+    <div class="tabControl">
+        <div class="tabTitleList">
+            <div class="tabTitle"><a class="active">案例一览</a></div>
+            <div class="tabTitle"><a class="">jGrid</a></div>
+            <div class="tabTitle"><a class="">百度网盘</a></div>
+            <div class="tabTitle"><a class="hide">金山快盘</a></div>
+            <div class="tabTitle"><a class="hide">淘宝</a></div>
+            <div class="tabTitle"><a class="hide">京东</a></div>
+            <div class="tabTitle"><a class="hide">115网盘</a></div>
+            <div class="tabTitle"><a class="hide">Windows系统</a></div>
+        </div>
+        <div class="tabPageList">
+            <div class="tabPage">
+                <div class="toolBar">
+                    jGrid案例一览
+                </div>
+                <div class="jgridBox">
+                    <div id="demoList" class="jgrid">
+                        <div class="demoItem">
+                            <span class="cover" style="background-image: url('images/icon.jpg')"></span>
+                            <span class="title">jGrid默认样式</span>
+                        </div>
+                        <div class="demoItem">
+                            <span class="cover" style="background-image: url('images/baidupan/icon.jpg')"></span>
+                            <span class="title">模拟百度云盘</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="slider">
+                    点击块进入相应的Demo页面
+                </div>
+            </div>
+            <div class="tabPage">
+                <div class="toolBar">
+                    jGrid Demo
+                </div>
+                <div class="jgridBox">
+                    <div id="dm_jGrid" class="jgrid"></div>
+                </div>
+                <div class="slider">
+                    说明
+                </div>
+            </div>
+            <div class="tabPage">
+                <div class="toolBar">
+                    百度网盘
+                </div>
+                <div class="jgridBox">
+                    <div id="dm_baidupan" class="jgrid"></div>
+                </div>
+                <div class="slider">
+                    说明
+                </div>
+            </div>
+            <div class="tabPage">
+                <div class="toolBar">
+                    金山快盘
+                </div>
+                <div id="dm_kuaipan" class="jgrid"></div>
+            </div>
+            <div class="tabPage">
+                <div class="toolBar">
+                    淘宝
+                </div>
+                <div id="dm_taobao" class="jgrid"></div>
+            </div>
+            <div class="tabPage">
+                <div class="toolBar">
+                    京东
+                </div>
+                <div id="dm_jd" class="jgrid"></div>
+            </div>
+            <div class="tabPage">
+                <div class="toolBar">
+                    115网盘
+                </div>
+                <div id="dm_115" class="jgrid"></div>
+            </div>
+            <div class="tabPage">
+                <div class="toolBar">
+                    Windows系统
+                </div>
+                <div id="dm_win" class="jgrid"></div>
+            </div>
+        </div>
+    </div>
+
+
+</body>
+</html>
