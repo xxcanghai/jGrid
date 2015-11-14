@@ -5,7 +5,7 @@ jGrid是一款基于jQuery的表格插件，与其他表格插件最大的不同
 
 其可以模拟当下大部分表格样式，如百度云盘，115网盘，金山快盘等
 
----
+
 ## DEMO演示
 访问地址：<a href="http://xxcanghai.github.io/jGrid/demo/jch.jGrid.Demo.html" target="_blank">jGrid.Demo所有演示案例</a>
 
