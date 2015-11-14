@@ -7,17 +7,17 @@
     <script src="lib/jquery-1.9.1.js"></script>
     <script src="lib/beautify.js"></script>
     <!--<link href="../../../bootstrap3.0/css/bootstrap.css" rel="stylesheet" />-->
-    <link  href="lib/main.css" rel="stylesheet" />
+    <link href="lib/main.css" rel="stylesheet" />
     <script src="lib/Core/jch.Core.js"></script>
-    <link  href="lib/jCheckBox/jch.jCheckBox.css" rel="stylesheet" />
+    <link href="lib/jCheckBox/jch.jCheckBox.css" rel="stylesheet" />
     <script src="lib/jCheckBox/jch.jCheckBox.js"></script>
     <script src="lib/staticPage/jch.staticPage-1.0.js"></script>
-    <link  href="lib/tabControl/jch.tabControl.css" rel="stylesheet" />
+    <link href="lib/tabControl/jch.tabControl.css" rel="stylesheet" />
     <script src="lib/tabControl/jch.tabControl.js"></script>
-    <link  href="lib/wxc/xcConfirm/css/xcConfirm.css" rel="stylesheet" />
+    <link href="lib/wxc/xcConfirm/css/xcConfirm.css" rel="stylesheet" />
     <script src="lib/wxc/xcConfirm/js/xcConfirm.js"></script>
     <script src="../jch.jGrid.js"></script>
-    <link  href="../jch.jGrid.css" rel="stylesheet" />
+    <link href="../jch.jGrid.css" rel="stylesheet" />
     <script>
         Array.prototype.repeat = function (count) {
             if (count == undefined) return this;
@@ -750,7 +750,7 @@
         /*代码编辑*/
         .toolBar { background: none repeat scroll 0 0 #eee; height: 30px; line-height: 30px; padding: 0 10px; }
         pre { white-space: pre-wrap; word-wrap: break-word; word-break: break-all; margin: 0; height: calc(100% - 30px); overflow-y: scroll; font-family: "Consolas","Lucida Console","微软雅黑"; font-size: 15px; }
-        .tableDemo, form { height: calc(100% - 30px); overflow-y: scroll; }
+        .tableDemo, form { overflow-y: scroll; position: absolute; top: 30px; bottom: 0; left: 0; right: 0; }
 
         /*回调函数编辑 xcConfirm*/
         .linkShowFn { color: blue; cursor: pointer; text-decoration: underline; }
@@ -900,7 +900,7 @@
         <div class="tabControl">
             <div class="tabTitleList">
                 <div class="tabTitle"><a class="active">表格设置</a></div>
-                <div class="tabTitle"><a class="">setting</a></div>
+                <div class="tabTitle"><a class="">使用帮助</a></div>
             </div>
             <div class="tabPageList">
                 <div class="tabPage">
@@ -908,8 +908,9 @@
                         <input type="reset" value="重置设定" onclick="location.reload(true);" />
                         <input type="button" value="全部收缩" onclick="$('.linkExpColl').filter(function () { return $(this).text().indexOf('收缩') >= 0; }).click();" />
                         <input type="button" value="全部展开" onclick="$('.linkExpColl').filter(function () { return $(this).text().indexOf('展开') >= 0; }).click();" />
-                        <label>
-                            <input class="runtimeEdit" type="checkbox" />实时编辑</label>
+                        <label title="所见既所得，所有修改将实时生效，但响应会略卡">
+                            <input class="runtimeEdit" type="checkbox" />实时编辑
+                        </label>
                         <input class="btnCreateConfig" type="button" value="←生成表格" style="float: right; color: red; font-weight: bold;" />
                     </div>
                     <form class="formConfig">
@@ -1339,7 +1340,7 @@ function(rdata){
                                         </td>
                                         <td>
                                             <label title="可重定义触发拖拽操作的元素选择器，例若设定为tr则点击行任何位置都触发开始拖拽。注意此设定为tbody下的事件代理选择器，您需要从tbody下书写触发拖拽操作的元素选择器">
-                                                触发拖拽选择器<input id="delegateSelector" type="text" value="" style="width: 115px;"/>
+                                                触发拖拽选择器<input id="delegateSelector" type="text" value="" style="width: 115px;" />
                                             </label>
                                         </td>
                                     </tr>
@@ -1433,7 +1434,8 @@ function(isSuccess,$dragPop){
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td colspan="3">从下方 <strong>表格字段</strong> 新增列类型为 <strong>工具栏</strong> 即可
+                                        <td colspan="3">
+                                            从下方 <strong>表格字段</strong> 新增列类型为 <strong>工具栏</strong> 即可
                                         </td>
                                     </tr>
                                     <tr>
@@ -1455,7 +1457,8 @@ function(isSuccess,$dragPop){
                             <legend>设置表格字段</legend>
                             <div style="margin-top: 5px;">
                                 <label>
-                                    <input type="checkbox" onchange="$(':checkbox.chkRowHeader').prop('checked',this.checked).trigger('change')" />全选</label>
+                                    <input type="checkbox" onchange="$(':checkbox.chkRowHeader').prop('checked',this.checked).trigger('change')" />全选
+                                </label>
                                 <span>设定表格所有列信息</span>
                                 *
                                 <input class="btnAdd" type="button" value="✚添加" />
@@ -1541,10 +1544,8 @@ function(isSuccess,$dragPop){
                                                     列名称<input header="name" type="text" />
                                                 </label>
                                             </td>
-                                            <td>
-                                            </td>
-                                            <td>
-                                            </td>
+                                            <td></td>
+                                            <td></td>
                                         </tr>
                                         <tr>
                                             <td>
@@ -1611,7 +1612,20 @@ function(c,r){
                         <br />
                     </form>
                 </div>
-                <div class="tabPage">settingsssss</div>
+                <div class="tabPage">
+                    <div class="toolBar">
+                        <span></span>
+                    </div>
+                    <h2>快速上手</h2>
+                    只需三步快速查看效果：
+                    <p>
+                        1、将服务器端返回的数据JSON字符串粘贴到左侧“数据源”文本框中(需为纯数组格式)
+                        <br/>
+                        2、点击左侧“数据源”顶部红色的<b>“生成表格字段”</b>按钮
+                        <br/>
+                        3、点击右侧“表格设置”的红色<b>“生成表格”</b>按钮，即可查看最终表格效果
+                    </p>
+                </div>
             </div>
         </div>
     </div>

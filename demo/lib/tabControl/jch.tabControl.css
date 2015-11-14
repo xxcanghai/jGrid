@@ -6,7 +6,7 @@
 .tabControl .tabTitleList a { font-size: 16px; font-weight: bold; line-height: 34px; padding: 3px 0;color: rgb(191, 199, 217);text-decoration: none;}
 .tabControl .tabTitleList a:hover{ text-decoration: none;}
 /*.tabControl .tabPageList { margin-top: 1px; }*/
-.tabControl .tabPageList .tabPage { min-height: 100px; }
+.tabControl .tabPageList .tabPage { min-height: 100px;position: relative;}
 /*.tabControl .tabPageList li { width: 100%; border-bottom: 1px solid #eef0f1; }
 .tabControl .tabPageList .first { padding-top: 40px; }
 .tabControl .tabPageList .first a { display: block; height: 19px; padding-bottom: 5px; }*/
