@@ -7,10 +7,10 @@ jGrid是一款基于jQuery的表格插件，与其他表格插件最大的不同
 
 
 ## DEMO演示
-访问地址：[jGrid.Demo所有演示案例](http://xxcanghai.github.io/jGrid/demo/jch.jGrid.Demo.html)
+访问地址：<a href="http://xxcanghai.github.io/jGrid/demo/jch.jGrid.Demo.html" target="_blank">jGrid.Demo所有演示案例</a>
 
 ## 可视化编辑器
-访问地址：[jGrid.Editor可视化编辑器](http://xxcanghai.github.io/jGrid/demo/jch.jGrid.Editor.html)
+访问地址：<a href="http://xxcanghai.github.io/jGrid/demo/jch.jGrid.Editor.html" target="_blank">jGrid.Editor可视化编辑器</a>
 
 与其他插件参照着API文档编写插件config代码相比，jGrid提供了实时的可视化的方式来创建一个表格，并配置表格的所有功能，最后直接生成最终插件所有配置代码，最终直接将生成代码粘贴入页面即可运行
 
