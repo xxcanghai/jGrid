@@ -36,7 +36,7 @@
         #demoList .demoItem:hover { border-color: #9A9FA4; box-shadow: 0 0 6px 0 rgb(0, 0, 0); }
         #demoList .demoItem .title { background: #fafafa none repeat scroll 0 0; bottom: 0; display: block; height: 25px; line-height: 25px; overflow: hidden; position: absolute; text-indent: 3px; text-overflow: ellipsis; white-space: nowrap; width: 100%; }
         #demoList .demoItem:hover .title { display: block; }
-        #demoList .demoItem .cover { width: 100%; height: 100%; display: block; background-repeat: no-repeat; background-position: center; }
+        #demoList .demoItem .cover { width: 100%; display: block; background-repeat: no-repeat; background-position: center; top: 0; bottom: 25px; position: absolute; }
     </style>
     <style>
         #dm_baidupan { font-family: "宋体"; font-size: 12px; }
@@ -57,7 +57,7 @@
         #dm_baidupan .jCheckBox[jchecked="false"] { background-position: -113px 0; }
         #dm_baidupan .jCheckBox:hover { border-radius: 0; }
         #dm_baidupan .jCheckBox[jchecked="true"] { background-position: -113px -19px; }
-        #dm_baidupan .lsticon { background: transparent url("images/baidupan/sprite_list_icon.gif") no-repeat scroll -421px -83px; width: 16px; height: 16px;margin: 10px 5px 10px 0;float: left; }
+        #dm_baidupan .lsticon { background: transparent url("images/baidupan/sprite_list_icon.gif") no-repeat scroll -421px -83px; width: 16px; height: 16px; margin: 10px 5px 10px 0;display: inline-block; }
         #dm_baidupan .lsticon.t0 { background-position: -5px -3px; }
         #dm_baidupan .lsticon.t1 { background-position: -357px -83px; }
         #dm_baidupan .lsticon.t2 { background-position: -5px -83px; }
@@ -69,8 +69,9 @@
         #dm_baidupan .btnicon.down:hover { background-position: -181px -39px; }
         #dm_baidupan .btnicon.more { background-position: -208px -351px; }
         #dm_baidupan .btnicon.more:hover { background-position: -182px -308px; }
-        #dm_baidupan .btns { float: right; height: 36px; line-height: 36px; cursor: pointer; visibility: hidden; }
-        #dm_baidupan .link { float: left; height: 36px; line-height: 36px; }
+        #dm_baidupan .btns { display: inline-block; height: 36px; line-height: 36px; cursor: pointer; visibility: hidden;position: absolute;right: 0;background: rgb(240, 248, 253); ;}
+        #dm_baidupan .link {display: inline-block; height: 36px; line-height: 36px; }
+        #dm_baidupan .nameBox{ position: relative;}
         #dm_baidupan .jGrid tbody tr:hover .btns { visibility: visible; }
         #dm_baidupan .jGrid [rowtype="jRowToolBar"] { height: 41px; left: 30px; line-height: 41px; position: absolute; top: 1px; padding-left: 100px; display: none; background-color: rgb(247,247,247); }
         #dm_baidupan [rowtype=jRowToolBar] td { background: url("images/baidupan/btn_sprit.gif") no-repeat scroll 0 -144px; color: #333; display: inline-block; font-size: 12px; height: 28px; line-height: 28px; margin-right: 6px; outline: 0 none; padding-left: 35px; position: relative; vertical-align: middle; padding-right: 0; }
@@ -561,16 +562,19 @@
                         sortbyModel: jch.jGrid.sortbyModelEnum.string,
                         cellCb: function (c, r) {
                             var $e = this.getCore();
-                            $e.wrap($("<a class='link' href='#'>"));
-                            this.element.prepend(
-                                $("<span>").addClass("lsticon").addClass("t" + r.Type)
-                            ).append(
-                                $("<div class='btns'>").append(
-                                    $("<span class='btnicon share'>")
+                            this.element.append(
+                                $("<div class='nameBox'>").append(
+                                    $("<span>").addClass("lsticon").addClass("t" + r.Type)
                                 ).append(
-                                    $("<span class='btnicon down'>")
+                                    $e//$e.wrap($("<a class='link' href='#'>"))
                                 ).append(
-                                    $("<span class='btnicon more'>")
+                                    $("<div class='btns'>").append(
+                                        $("<span class='btnicon share'>")
+                                    ).append(
+                                        $("<span class='btnicon down'>")
+                                    ).append(
+                                        $("<span class='btnicon more'>")
+                                    )
                                 )
                             );
                         }
@@ -975,16 +979,16 @@
                 <div class="jgridBox">
                     <div id="demoList" class="jgrid">
                         <div class="demoItem">
-                            <span class="cover" style="background-image: url('images/icon.jpg')"></span>
-                            <span class="title">jGrid默认样式</span>
+                            <div class="cover" style="background-image: url('images/icon.jpg')"></div>
+                            <div class="title">jGrid默认样式</div>
                         </div>
                         <div class="demoItem">
-                            <span class="cover" style="background-image: url('images/baidupan/icon.jpg')"></span>
-                            <span class="title">模拟百度云盘</span>
+                            <div class="cover" style="background-image: url('images/baidupan/icon.jpg')"></div>
+                            <div class="title">模拟百度云盘</div>
                         </div>
                         <div class="demoItem">
-                            <span class="cover" style="background-image: url('images/kuaipan/kuaipan.png')"></span>
-                            <span class="title">模拟快盘</span>
+                            <div class="cover" style="background-image: url('images/kuaipan/kuaipan.png')"></div>
+                            <div class="title">模拟快盘</div>
                         </div>
                     </div>
                 </div>
