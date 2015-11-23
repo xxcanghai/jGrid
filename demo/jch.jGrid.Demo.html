@@ -5,12 +5,12 @@
     <title>jch.jGrid.Demo</title>
 
     <script src="lib/jquery-1.9.1.js"></script>
-    <link  href="lib/bootstrap3.0/css/bootstrap.css" rel="stylesheet" />
+    <link href="lib/bootstrap3.0/css/bootstrap.css" rel="stylesheet" />
     <script src="lib/Core/jch.Core.js"></script>
-    <link  href="lib/jCheckBox/jch.jCheckBox.css" rel="stylesheet" />
+    <link href="lib/jCheckBox/jch.jCheckBox.css" rel="stylesheet" />
     <script src="lib/jCheckBox/jch.jCheckBox.js"></script>
     <script src="lib/staticPage/jch.staticPage-1.0.js"></script>
-    <link  href="lib/tabControl/jch.tabControl.css" rel="stylesheet" />
+    <link href="lib/tabControl/jch.tabControl.css" rel="stylesheet" />
     <script src="lib/tabControl/jch.tabControl.js"></script>
     <script src="../jch.jGrid.js"></script>
     <link href="../jch.jGrid.css" rel="stylesheet" />
@@ -19,7 +19,7 @@
         a { cursor: pointer; }
         h1 { color: white; margin: 0; padding: 10px; }
         .hide { display: none; }
-        [id*='cnzz']{ display: none;}
+        [id*='cnzz'] { display: none; }
         /*TabControls*/
         .tabControl { bottom: 0; position: absolute; top: 60px; width: 100%; }
         .tabControl .tabTitleList { border-bottom: 1px solid rgb(240, 240, 240); }
@@ -34,7 +34,7 @@
         #demoList { }
         #demoList .demoItem { border: 1px solid #d8d8d8; float: left; height: 200px; margin: 10px; opacity: 1; position: relative; width: 300px; cursor: pointer; }
         #demoList .demoItem:hover { border-color: #9A9FA4; box-shadow: 0 0 6px 0 rgb(0, 0, 0); }
-        #demoList .demoItem .title { background: #fafafa none repeat scroll 0 0; bottom: 0; display: block; height: 25px; line-height: 25px; overflow: hidden; position: absolute; text-indent: 3px; text-overflow: ellipsis; white-space: nowrap; width: 100%;  }
+        #demoList .demoItem .title { background: #fafafa none repeat scroll 0 0; bottom: 0; display: block; height: 25px; line-height: 25px; overflow: hidden; position: absolute; text-indent: 3px; text-overflow: ellipsis; white-space: nowrap; width: 100%; }
         #demoList .demoItem:hover .title { display: block; }
         #demoList .demoItem .cover { width: 100%; height: 100%; display: block; background-repeat: no-repeat; background-position: center; }
     </style>
@@ -57,7 +57,7 @@
         #dm_baidupan .jCheckBox[jchecked="false"] { background-position: -113px 0; }
         #dm_baidupan .jCheckBox:hover { border-radius: 0; }
         #dm_baidupan .jCheckBox[jchecked="true"] { background-position: -113px -19px; }
-        #dm_baidupan .lsticon { background: transparent url("images/baidupan/sprite_list_icon.gif") no-repeat scroll -421px -83px; width: 16px; height: 16px; }
+        #dm_baidupan .lsticon { background: transparent url("images/baidupan/sprite_list_icon.gif") no-repeat scroll -421px -83px; width: 16px; height: 16px;margin: 10px 5px 10px 0;float: left; }
         #dm_baidupan .lsticon.t0 { background-position: -5px -3px; }
         #dm_baidupan .lsticon.t1 { background-position: -357px -83px; }
         #dm_baidupan .lsticon.t2 { background-position: -5px -83px; }
@@ -72,7 +72,7 @@
         #dm_baidupan .btns { float: right; height: 36px; line-height: 36px; cursor: pointer; visibility: hidden; }
         #dm_baidupan .link { float: left; height: 36px; line-height: 36px; }
         #dm_baidupan .jGrid tbody tr:hover .btns { visibility: visible; }
-        #dm_baidupan .jGrid [rowtype="jRowToolBar"] { height: 41px; left: 30px; line-height: 41px; position: absolute; top: 1px; padding-left: 100px; display: none; background-color: rgb(242, 246, 255); }
+        #dm_baidupan .jGrid [rowtype="jRowToolBar"] { height: 41px; left: 30px; line-height: 41px; position: absolute; top: 1px; padding-left: 100px; display: none; background-color: rgb(247,247,247); }
         #dm_baidupan [rowtype=jRowToolBar] td { background: url("images/baidupan/btn_sprit.gif") no-repeat scroll 0 -144px; color: #333; display: inline-block; font-size: 12px; height: 28px; line-height: 28px; margin-right: 6px; outline: 0 none; padding-left: 35px; position: relative; vertical-align: middle; padding-right: 0; }
         #dm_baidupan [rowtype=jRowToolBar] td .jCell { background: #f2f6ff url("images/baidupan/btn_sprit.gif") right -144px; color: #666; display: block; padding-right: 10px; }
         #dm_baidupan [rowtype=jRowToolBar] td a { background: url("images/baidupan/btn_icon.gif"); display: block; height: 20px; left: 10px; position: absolute; top: 5px; width: 20px; }
@@ -88,12 +88,49 @@
         #dm_baidupan .dragPop tbody tr { background-color: rgb(209,232,255); }
         #dm_baidupan .dragPop tbody tr:hover { background-color: rgb(209,232,255); cursor: inherit; }
     </style>
+    <style>
+        /*------------------------金山快盘样式-----------------------------*/
+        #dm_kuaipan { font-size: 12px; }
+        #dm_kuaipan .checkallLabel { display: none; }
+        #dm_kuaipan .jGrid tbody tr { height: 45px; }
+        #dm_kuaipan td[celltype="jCellIcon"] .jCellIcon { float: left; height: 32px; width: 32px; }
+        /*// #dm_kuaipan td[celltype="jCellIconText"] .jCellIcon { padding-right: 8px;position: absolute;}*/
+        #dm_kuaipan .link { color: black; position: absolute; }
+        #dm_kuaipan .link:hover { color: black; }
+        #dm_kuaipan .btns { visibility: hidden; }
+        #dm_kuaipan .jGrid tbody tr:hover .btns { visibility: visible; }
+        #dm_kuaipan .jGrid td { position: relative; }
+        #dm_kuaipan .jGrid .tdCss { padding: 0; }
+        #dm_kuaipan .btnIcon { background: url("images/kuaipan/237.png"); cursor: pointer; float: left; height: 34px; width: 30px; }
+        #dm_kuaipan .btnIcon.uploadIcon { background-position: 5px -45px; }
+        #dm_kuaipan .btnIcon.uploadIcon:hover { background-position: 5px -70px; }
+        #dm_kuaipan .btnIcon.deleteIcon { background-position: 5px -95px; }
+        #dm_kuaipan .btnIcon.deleteIcon:hover { background-position: 5px -120px; }
+        #dm_kuaipan .btnIcon.editIcon { background-position: 4px 55px; }
+        #dm_kuaipan .btnIcon.editIcon:hover { background-position: 4px 30px; }
+        #dm_kuaipan .btnIcon.renameIcon { background-position: 5px -245px; }
+        #dm_kuaipan .btnIcon.renameIcon:hover { background-position: 5px -270px; }
+        #dm_kuaipan .btnIcon.empty { width: 30px; height: 18px; background: white; cursor: default; }
+        #dm_kuaipan .tokyoSort { background-image: url("images/kuaipan/sort2.png"); display: inline-block; height: 11px; margin-left: 5px; width: 10px; }
+        #dm_kuaipan .tokyoSort.defalut { background: white; }
+        #dm_kuaipan .tokyoSort.asc { background-position: 0 0px; }
+        #dm_kuaipan .tokyoSort.desc { background-position: 0 10px; }
+        #dm_kuaipan .jCheckBox { background-image: url("images/kuaipan/check.png"); display: inline-block; height: 14px; width: 14px; }
+        #dm_kuaipan .jCheckBox[jchecked="false"][jenabled="true"] { background-position: 0 69px; }
+        #dm_kuaipan .jCheckBox[jchecked="true"][jenabled="true"] { background-position: 0 27px; }
+        #dm_kuaipan .jGrid .jCellEditBox { height: 30px; margin: -31px 45px; position: absolute; width: 100%; }
+        #dm_kuaipan .jGrid .jCellEditBox .ltCont { margin-left: 0px; }
+        #dm_kuaipan .jGrid .jCellEditBox .ltLeft { margin-left: 0px; }
+        #dm_kuaipan .jGrid .spanMargin { margin-left: 14px; }
+    </style>
+
     <script>
         $(function () {
             "use strict";
             window.jch.tabControl();
             stateFunctionTime(dm_jGrid);
             stateFunctionTime(dm_baidupan);
+            stateFunctionTime(dm_kuaipan);
             $("#demoList").delegate(".demoItem", "click", demoItemClick);
             //tabGotoPage(2);
 
@@ -140,6 +177,7 @@
                 return Math.round((fileLength / Math.pow(1024, 5)), 0) + "PB";
             };
 
+            //jGrid
             function dm_jGrid() {
                 var jch = window.jch;
                 var myCheckall = window.jch.jCheckBox();
@@ -429,6 +467,7 @@
                 myCheckall.initCheckAllMode(myCheckallSubArr);
             }
 
+            //百度网盘
             function dm_baidupan() {
                 var data = [{
                     "Name": "软件包",
@@ -477,19 +516,42 @@
                     "Type": 3
                 }];
                 var config = {
-                    headers: [{
-                        cellType: jch.jGrid.jCell,
-                        text: "",
-                        width: "30px",
-                        field: "Type",
-                        name: "Type",
-                        cellCb: function (c, r) {
-                            this.getCore().remove();
-                            return $("<div>").addClass("lsticon").addClass("t" + c);
-                        },
-                        cellHeaderCb: function (c, r) {
-                        }
-                    }, {
+                    headers: [
+                    //    {
+                    //    cellType: jch.jGrid.jCell,
+                    //    text: "",
+                    //    width: "30px",
+                    //    field: "Type",
+                    //    name: "Type",
+                    //    cellCb: function (c, r) {
+                    //        this.getCore().remove();
+                    //        return $("<div>").addClass("lsticon").addClass("t" + c);
+                    //    },
+                    //    cellHeaderCb: function (c, r) {
+                    //    }
+                    //}, {
+                    //    cellType: jch.jGrid.jCell,
+                    //    text: "文件名",
+                    //    width: "",
+                    //    field: "Name",
+                    //    name: "Name",
+                    //    sortModel: jch.jGrid.sortModelEnum.single,
+                    //    sortbyModel: jch.jGrid.sortbyModelEnum.string,
+                    //    cellCb: function (c, r) {
+                    //        var $e = this.getCore();
+                    //        $e.wrap($("<a class='link' href='#'>"));
+                    //        this.element.append(
+                    //            $("<div class='btns'>").append(
+                    //                $("<span class='btnicon share'>")
+                    //            ).append(
+                    //                $("<span class='btnicon down'>")
+                    //            ).append(
+                    //                $("<span class='btnicon more'>")
+                    //            )
+                    //        );
+                    //    }
+                    //},
+                    {
                         cellType: jch.jGrid.jCell,
                         text: "文件名",
                         width: "",
@@ -500,7 +562,9 @@
                         cellCb: function (c, r) {
                             var $e = this.getCore();
                             $e.wrap($("<a class='link' href='#'>"));
-                            this.element.append(
+                            this.element.prepend(
+                                $("<span>").addClass("lsticon").addClass("t" + r.Type)
+                            ).append(
                                 $("<div class='btns'>").append(
                                     $("<span class='btnicon share'>")
                                 ).append(
@@ -510,7 +574,8 @@
                                 )
                             );
                         }
-                    }, {
+                    },
+                    {
                         cellType: jch.jGrid.jCell,
                         text: "大小",
                         width: "",
@@ -668,6 +733,222 @@
                 var myDataArr = repeat(data, 3);
                 jgrid.setData(myDataArr, 1, myDataArr.length);
             }
+
+            //金山快盘
+            function dm_kuaipan() {
+                var fileTypeEnum = {
+                    type1: {
+                        icon: "images/kuaipan/word.png",
+                        text: "doc"
+                    }, type2: {
+                        icon: "images/kuaipan/excel.png",
+                        text: "xlsx"
+                    }, type3: {
+                        icon: "images/kuaipan/ppt.png",
+                        text: "ppt"
+                    }, type4: {
+                        icon: "images/kuaipan/ppt.png",
+                        text: "xml"
+                    }, type5: {
+                        icon: "images/kuaipan/ppt.png",
+                        text: "pdf"
+                    }, type6: {
+                        icon: "images/kuaipan/ppt.png",
+                        text: "html"
+                    }, type7: {
+                        icon: "images/kuaipan/file.png",
+                        text: "文件夹"
+                    }
+                }
+                var kuaiPanData = [
+                    {
+                        "FileName": "软件安装包",
+                        "FileSize": 1548956,
+                        "FileType": 4,
+                        "UpDate": 1442541260867
+                    },
+                    {
+                        "FileName": "下载文件文档",
+                        "FileSize": 15956,
+                        "FileType": 5,
+                        "UpDate": 1442541060867
+                    }, {
+                        "FileName": "英语四级真题",
+                        "FileSize": 3144555,
+                        "FileType": 1,
+                        "UpDate": 1442541260467
+                    }, {
+                        "FileName": "angular指令作用域问题一览",
+                        "FileSize": 33,
+                        "FileType": 3,
+                        "UpDate": 1442141260867
+                    }, {
+                        "FileName": "工厂2020年全厂员工工资条",
+                        "FileSize": 131,
+                        "FileType": 2,
+                        "UpDate": 1442541260067,
+                    }, {
+                        "FileName": "文件名特别特别特别特的长长长常常常常常常文件名特别特别特别特的长长长长长长长长长长长长长长长长长长长文件名特别特别特别特的长长长长长文件名特别特别特别特的长长长长长长长长end",
+                        "FileSize": 76654,
+                        "FileType": 1,
+                        "UpDate": 1442541200867
+                    }, {
+                        "FileName": "文件名特别特别特别特的长长长常常常常常常长长长长长长长长长长长长长长长长长长长长长end",
+                        "FileSize": 76654,
+                        "FileType": 1,
+                        "UpDate": 1442541200867
+                    }
+                ];
+                var config = {
+                    headers: [
+                    {
+                        cellType: jch.jGrid.jCellIconText,
+                        width: "",
+                        text: "文件名",
+                        field: "FileName",
+                        sortModel: jch.jGrid.sortModelEnum.single,
+                        sortbyModel: jch.jGrid.sortbyModelEnum.string,
+                        icon: function (c, r) {
+                            return fileTypeEnum["type" + r.FileType].icon;
+                        },
+                        cellHeaderCb: function (cdata, rdata) {
+                            this.element.find(".sort").removeClass("sort").addClass("tokyoSort asc").removeClass("default");
+                        },
+                        cellCb: function () {
+                            this.element.find("span").addClass("spanMargin");
+                        }
+                    }, {
+                        cellType: jch.jGrid.jCell,
+                        value: " ",
+                        width: "210px",
+                        cellCb: function (c, r) {
+                            var $e = this.getCore();
+                            var fileName = this.row.cells[1];
+                            $e.wrap($("<a class='link' href='#'>"));
+
+                            var deleteIcon = $("<div>").attr("title", "删除").addClass("btnIcon deleteIcon");
+                            var uploadIcon = $("<div>").attr("title", "下载").addClass("btnIcon uploadIcon");
+                            var renameIcon = $("<div>").attr("title", "重命名").addClass("btnIcon renameIcon");
+                            var editIcon = $("<div>").attr("title", "编辑").addClass("btnIcon editIcon");
+                            var emptyIcon = $("<div>").addClass("btnIcon empty");
+                            var buttonIcon = $("<div>").append(uploadIcon).append(deleteIcon).append(renameIcon).addClass("btns");
+                            if (r.FileType == 7) {
+                                buttonIcon.append(emptyIcon);
+                            } else {
+                                buttonIcon.prepend(editIcon);
+                            }
+                            this.element.append(buttonIcon);
+                            var renameClick = this.element.find(".renameIcon");//编辑按钮
+                            renameClick.click(function () {
+                                fileName.edit(true, {});
+                                var $editBox = fileName.element.data("editBox");
+                                //console.log($editBox);
+                                $editBox.find(".ltRight").remove();
+                                var ebText = $editBox.find(".ebText");
+                                ebText.blur(function () {
+                                    var ebVal = ebText.val();
+                                    if (ebVal == null || ebVal.length == 0) {
+                                        alert("文件名不能为空");
+                                    } else {
+                                        fileName.edit(false, {
+                                            result: true,
+                                            cellData: $(this).val()
+                                        });
+                                    }
+                                }).select();
+                            });
+                        }
+                    }, {
+                        cellType: jch.jGrid.jCell,
+                        width: "100",
+                        text: "大小",
+                        field: "FileSize",
+                        sortModel: jch.jGrid.sortModelEnum.single,
+                        sortbyModel: jch.jGrid.sortbyModelEnum.number,
+                        value: function (c, r) {
+                            if (c != null) return getFileSize(c);
+                        },
+                        cellHeaderCb: function (cdata, rdata) {
+                            this.element.find(".sort").removeClass("sort").addClass("tokyoSort");
+                        }
+                    }, {
+                        cellType: jch.jGrid.jCell,
+                        width: "100",
+                        text: "类型",
+                        field: "FileType",
+                        sortModel: jch.jGrid.sortModelEnum.single,
+                        sortbyModel: jch.jGrid.sortbyModelEnum.number,
+                        value: function (c, r) {
+                            return fileTypeEnum["type" + c].text;
+                        },
+                        cellHeaderCb: function (cdata, rdata) {
+                            this.element.find(".sort").removeClass("sort").addClass("tokyoSort");
+                        }
+                    }, {
+                        cellType: jch.jGrid.jCell,
+                        width: "150",
+                        text: "修改日期",
+                        field: "UpDate",
+                        sortModel: jch.jGrid.sortModelEnum.single,
+                        sortbyModel: jch.jGrid.sortbyModelEnum.time,
+                        value: function (c, r) {
+                            return new Date(c).toLocaleString();
+                        },
+                        cellHeaderCb: function (cdata, rdata) {
+                            this.element.find(".sort").removeClass("sort").addClass("tokyoSort");
+                        }
+                    }],
+                    config: {
+                        isShowColHeader: true,
+                        isShowColHeaderText: true,
+                        isShowFooter: false,
+                        isStaticPage: false,
+                        isShowDefaultValue: true,
+                        defaultValue: "-"
+                    },
+                    checkable: {
+                        checkbox: {
+                            checked: false,
+                            enabled: true
+                        },
+                        checkall: {
+                            checked: false,
+                            enabled: true
+                        },
+                        model: window.jch.jGrid.checkableModelEnum.multiple
+                        //},
+                        //drag: {
+                        //    model: window.jch.jGrid.dragModelEnum.single
+                    }
+                }
+                var dmKuaiPanList = window.jch.jGrid(config);
+                $("#dm_kuaipan").append(dmKuaiPanList.element);
+
+                var kuaipanArr = repeat(kuaiPanData, 2);
+                //加载数据
+                dmKuaiPanList.setData(kuaipanArr, 1, kuaipanArr.length);
+                //设置进入页面按文件名升序排序
+                var columnIndex = dmKuaiPanList.getHeaderRow().cells[1].cellIndex;
+                var sortbyModelOrFn = jch.jGrid.sortbyModelEnum.string;
+                var orderModel = jch.jGrid.orderModelEnum.asc;
+                var isSingle = jch.jGrid.sortModelEnum.single;
+                dmKuaiPanList.columnSort(columnIndex, sortbyModelOrFn, orderModel, isSingle);
+                //设置其他排序按钮隐藏
+                dmKuaiPanList.element.find(".default.tokyoSort").hide();
+                //当点击其他排序方式时排序图标显示方式
+                var sortBtn = dmKuaiPanList.element.find(".tokyoSort");
+                var columnx = dmKuaiPanList.getHeaderRow().element;
+                columnx.click(function () {
+                    $.map(sortBtn, function (o, i) {
+                        var $sortCell = $(o);
+                        if ($sortCell.hasClass("default")) {
+                            $sortCell.hide();
+                        } else if ($sortCell.hasClass("asc") || $sortCell.hasClass("desc")) {
+                            $sortCell.show();
+                        }
+                    });
+                });
+            }
         })
     </script>
 </head>
@@ -677,10 +958,10 @@
     </div>
     <div class="tabControl">
         <div class="tabTitleList">
-            <div class="tabTitle"><a class="active">案例一览</a></div>
+            <div class="tabTitle current"><a class="active">案例一览</a></div>
             <div class="tabTitle"><a class="">jGrid</a></div>
             <div class="tabTitle"><a class="">百度网盘</a></div>
-            <div class="tabTitle"><a class="hide">金山快盘</a></div>
+            <div class="tabTitle"><a class="">金山快盘</a></div>
             <div class="tabTitle"><a class="hide">淘宝</a></div>
             <div class="tabTitle"><a class="hide">京东</a></div>
             <div class="tabTitle"><a class="hide">115网盘</a></div>
@@ -700,6 +981,10 @@
                         <div class="demoItem">
                             <span class="cover" style="background-image: url('images/baidupan/icon.jpg')"></span>
                             <span class="title">模拟百度云盘</span>
+                        </div>
+                        <div class="demoItem">
+                            <span class="cover" style="background-image: url('images/kuaipan/kuaipan.png')"></span>
+                            <span class="title">模拟快盘</span>
                         </div>
                     </div>
                 </div>
@@ -733,37 +1018,62 @@
                 <div class="toolBar">
                     金山快盘
                 </div>
-                <div id="dm_kuaipan" class="jgrid"></div>
+                <div class="jgridBox">
+                    <div id="dm_kuaipan" class="jgrid"></div>
+                </div>
+                <div class="slider">
+                    说明
+                </div>
             </div>
             <div class="tabPage">
                 <div class="toolBar">
                     淘宝
                 </div>
-                <div id="dm_taobao" class="jgrid"></div>
+                <div class="jgridBox">
+                    <div id="dm_taobao" class="jgrid"></div>
+                </div>
+                <div class="slider">
+                    说明
+                </div>
             </div>
             <div class="tabPage">
                 <div class="toolBar">
                     京东
                 </div>
-                <div id="dm_jd" class="jgrid"></div>
+                <div class="jgridBox">
+                    <div id="dm_jd" class="jgrid"></div>
+                </div>
+                <div class="slider">
+                    说明
+                </div>
             </div>
             <div class="tabPage">
                 <div class="toolBar">
                     115网盘
                 </div>
-                <div id="dm_115" class="jgrid"></div>
+                <div class="jgridBox">
+                    <div id="dm_115" class="jgrid"></div>
+                </div>
+                <div class="slider">
+                    说明
+                </div>
             </div>
             <div class="tabPage">
                 <div class="toolBar">
                     Windows系统
                 </div>
-                <div id="dm_win" class="jgrid"></div>
+                <div class="jgridBox">
+                    <div id="dm_win" class="jgrid"></div>
+                </div>
+                <div class="slider">
+                    说明
+                </div>
             </div>
         </div>
     </div>
 
     <!--Google统计-->
-    <script type="text/javascript">
+    <!--<script type="text/javascript">
         var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
         document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
     </script>
@@ -773,7 +1083,7 @@
             pageTracker._trackPageview();
         } catch (err) {
         }
-    </script>
+    </script>-->
     <!--CNZZ统计-->
     <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://"); document.write(unescape("%3Cspan id='cnzz_stat_icon_1256771988'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1256771988' type='text/javascript'%3E%3C/script%3E"));</script>
 </body>
