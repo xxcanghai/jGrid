@@ -153,14 +153,13 @@
                 config.onOk(v);
             else
                 config.onOk();
-            $("#" + popId).remove();
             exit(eventType.ok);
         }
 
         //插件退出-jch
         function exit(evType) {
             evType = evType == undefined ? eventType.none : evType;
-            config.onClose(evType);
+            if(config.onClose(evType)===false) return;
             $("#" + popId).remove();
             $(window).unbind("keydown");
         }

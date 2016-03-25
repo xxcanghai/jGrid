@@ -711,14 +711,14 @@
                         model: jch.jGrid.expandModelEnum.multiple,
                         onExpand: function (rdata, expCell) {
                             expCell.element.append(rdata.Name);
-                            var $expBtn = this.getCell("expand").element.data("jCellExpandButton");
+                            var $expBtn = this.getCell("_expand").element.data("jCellExpandButton");
                             $expBtn.removeClass("collapse").addClass("expand");
                         },
                         onBeforeCollapse: function () {
                             //return false;
                         },
                         onCollapse: function (rdata) {
-                            var $expBtn = this.getCell("expand").element.data("jCellExpandButton");
+                            var $expBtn = this.getCell("_expand").element.data("jCellExpandButton");
                             $expBtn.removeClass("expand").addClass("collapse");
                         }
                     }
@@ -728,7 +728,7 @@
                     e = e || window.event;
                     var $tr = $(this).closest("tr");
                     //var $target = $(e.target || e.srcElement);
-                    var jcb = $($tr).data("jRow").getCell("checkbox").element.data("jCheckBox");
+                    var jcb = $($tr).data("jRow").getCell("_checkbox").element.data("jCheckBox");
                     jcb.change();
 
                 });

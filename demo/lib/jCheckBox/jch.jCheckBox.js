@@ -180,7 +180,7 @@ var jch;
                         a.change(chkState, true, e);
                     });
                 }
-                console.log("change", this.element);
+                //console.log("change", this.element);
                 this.checkedListener(this, e, chkState);
             }
         };
