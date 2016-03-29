@@ -29,7 +29,7 @@
 .jGrid thead .sort.desc { background-position: -10px 0; }
 
 /*图片单元格*/
-.jGrid td[celltype="jCellIcon"] .jCellIcon { display: block; margin: 0 auto; width: 80px; height: 80px; }
+.jGrid td[celltype="jCellIcon"] .jCellIcon { display: block; margin: 0 auto; max-width: 80px; max-height: 80px; }
 
 /*行头单元格*/
 .jGrid td[celltype="jCellRowHeader"] .jCheckBox { display: block; margin: 0 auto; }

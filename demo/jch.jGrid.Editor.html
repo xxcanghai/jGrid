@@ -7,7 +7,7 @@
 
     <script src="lib/jquery-1.9.1.js"></script>
     <script src="lib/beautify.js"></script>
-    <!--<link href="../../../bootstrap3.0/css/bootstrap.css" rel="stylesheet" />-->
+    <!--<link href="lib/bootstrap3.0/css/bootstrap.css" rel="stylesheet" />-->
     <link href="lib/main.css" rel="stylesheet" />
     <script src="lib/Core/jch.Core.js"></script>
     <link href="lib/jCheckBox/jch.jCheckBox.css" rel="stylesheet" />
@@ -895,7 +895,7 @@
                     <div class="tabPage">
                         <div class="toolBar">
                             <span>将服务器返回的数据的<b>Data数组</b>粘贴在此。</span>
-                            <input type="button" value="格式化代码" onclick="$('#txtServerData').text(js_beautify($('#txtServerData').text()));" />
+                            <!--<input type="button" value="格式化代码" onclick="$('#txtServerData').text(js_beautify($('#txtServerData').text()));" />-->
                             <input class="btnCreateHeader" type="button" value="生成表格字段→" style="color: red;" title="将服务器返回的数据对象自动识别生成表格的字段" />
                         </div>
                         <pre spellcheck="false" id="txtServerData" contenteditable="true">
@@ -995,7 +995,7 @@
                     <div class="tabPage">
                         <div class="toolBar">
                             <span>按下 Shift+回车 键可格式化代码</span>
-                            <input type="button" value="格式化代码" onclick="$('.configStr').text(js_beautify($('.configStr').text()));" />
+                            <!--<input type="button" value="格式化代码" onclick="$('.configStr').text(js_beautify($('.configStr').text()));" />-->
                             <input class="btnCreateTable" type="button" value="生成表格" />
                         </div>
                         <pre spellcheck="false" class="configStr" contenteditable="true">请点击右侧的[生成表格]按钮来生成jGrid的config代码</pre>
@@ -1805,7 +1805,7 @@ function(cellData,rowData){
     </div>
 
     <!--Google统计-->
-    <script type="text/javascript">
+    <!--<script type="text/javascript">
         var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
         document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
     </script>
@@ -1814,7 +1814,7 @@ function(cellData,rowData){
             var pageTracker = _gat._getTracker("UA-69985128-1");
             pageTracker._trackPageview();
         } catch (err) {}
-    </script>
+    </script>-->
     <!--CNZZ统计-->
     <script type="text/javascript">
         var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");
